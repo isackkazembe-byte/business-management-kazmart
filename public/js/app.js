@@ -2946,6 +2946,7 @@ function assignCust(c) {
     cardNumber: c.cardNumber || 'KM-0000',
     customerName: c.customerName || 'Guest',
     phone: c.phone || '',
+    email: c.email || '',          // 👈 ADD THIS LINE
     pointsBalance: c.loyaltyPoints || c.pointsBalance || c.points || 0,
     totalDebt: c.totalDebt || 0,
     status: c.status || 'Active',
@@ -3939,6 +3940,7 @@ window.closeQuickAddModal = closeQuickAddModal;
 // ============================================================
 
 async function completeSale() {
+   console.log('🧪 completeSale() STARTED');
   if (!S.cart.length) {
     alert('Cart is empty.');
     return;
@@ -4172,12 +4174,38 @@ async function completeSale() {
       now
     );
 
-    const modal = document.getElementById('receiptModal');
-    const content = document.getElementById('receiptContent');
-    if (modal && content) {
-      content.innerHTML = receiptHTML;
-      modal.style.display = 'flex';
-    }
+  const modal = document.getElementById('receiptModal');
+const content = document.getElementById('receiptContent');
+if (modal && content) {
+  content.innerHTML = receiptHTML;
+  modal.style.display = 'flex';
+}
+
+console.log('🔍 Customer object:', S.customer);
+console.log('🔍 Customer email:', S.customer?.email);
+
+
+    // ─── Send receipt email to customer ──────────────────────────
+console.log('📧 Checking customer for email:', S.customer);
+if (S.customer && S.customer.email) {
+  console.log('📧 Sending email to:', S.customer.email);
+  const emailEndpoint = 'https://business-management-kazmart.onrender.com/send-email';
+  fetch(emailEndpoint, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      to: S.customer.email,
+      subject: 'Your KazMart Receipt',
+      html: receiptHTML,
+      from: 'isackkazembe@gmail.com'
+    })
+  })
+    .then(res => res.json())
+    .then(data => console.log('✅ Receipt email sent to customer', data))
+    .catch(err => console.error('❌ Failed to send receipt email:', err));
+} else {
+  console.warn('⚠️ Skipped email — no customer email on file:', S.customer);
+}
 
     // ─── Reset cart & customer ───
     S.cart = [];
