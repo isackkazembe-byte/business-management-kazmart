@@ -1,0 +1,2044 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🛒 KazMart</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <!-- No layout.css – it's merged into style.css now -->
+</head>
+<body>
+
+  <!-- TOP BAR -->
+  <div id="topbar"></div>
+
+  <!-- MAIN WORKSPACE -->
+  <div class="app-container" style="display:flex; height:calc(100vh - 60px);">
+    
+    <!-- ====== Product / Content Area (70%) ====== -->
+    <div id="page-content" style="width:100%; max-width:100%; flex-shrink:0; padding:0; background:#F4F8FA; overflow-y:auto; display:flex; flex-direction:column; height:100%; box-sizing:border-box;">
+
+      <!-- ============================================================
+           POS VIEW (default)
+           ============================================================ -->
+      <div id="posView" style="display:flex; flex-direction:column; height:100%;">
+  <!-- Page Title -->
+  <div style="display:flex; justify-content:space-between; align-items:center; padding:16px 16px 4px 16px; flex-shrink:0;">
+    <h2 style="color:#0B5394; margin:0; font-size:20px; text-shadow: 0 2px 4px rgba(0,0,0,0.1); font-family: 'Century Gothic', 'Trebuchet MS', Arial, sans-serif;">🏪 Point Of Sales</h2>
+  </div>
+  <!-- Search -->
+  <div style="padding:10px 14px; background:#fff; border-bottom:1px solid #DDE6EA; flex-shrink:0; margin-top:4px;">
+    <input type="text" id="productSearch" placeholder="Search product by name or barcode..." style="width:100%; padding:8px 12px; border:1.5px solid #C9E8F3; border-radius:7px; font-size:13px; outline:none; box-sizing:border-box;" />
+  </div>
+   <!-- Categories -->
+  <div id="categoryFilter" class="cat-bar" style="padding:8px 14px; background:#fff; border-bottom:1px solid #DDE6EA; flex-shrink:0; display:flex; gap:8px; flex-wrap:wrap;">
+    <button class="cat-btn active" data-category="All" style="padding:6px 18px; border-radius:20px; border:1.5px solid #DDE6EA; background:#117594; color:#fff; cursor:pointer; font-weight:700; font-size:13px;">All</button>
+  </div>
+  <!-- Products -->
+  <div id="productGrid" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:16px; padding:16px; overflow-y:auto; flex:1; align-content:start;">
+    <p style="color:#999; grid-column:1/-1; text-align:center;">Loading products...</p>
+  </div>
+</div>
+
+      <!-- ============================================================
+           STOCK VIEW
+           ============================================================ -->
+      <div id="stockView" style="display:none; flex-direction:column; height:100%; padding:16px; overflow-y:auto;">
+        
+        <!-- Back button + Title with premium 3D style -->
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+          <h2 style="color:#0B5394; margin:0; font-size:20px; text-shadow: 0 2px 4px rgba(0,0,0,0.1); font-family: 'Century Gothic', 'Trebuchet MS', Arial, sans-serif;">📦 Stock Management</h2>
+          <button onclick="showPage('pos')" style="background:#117594; color:#fff; border:none; padding:8px 18px; border-radius:6px; cursor:pointer; font-weight:600; font-size:13px; font-family: 'Century Gothic', 'Trebuchet MS', Arial, sans-serif; box-shadow:0 4px 0 #0D5A70; transition:all 0.12s; display:flex; align-items:center; gap:6px;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 0 #0D5A70';" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 0 #0D5A70';" onmousedown="this.style.transform='translateY(2px)';this.style.boxShadow='0 2px 0 #0D5A70';" onmouseup="this.style.transform='translateY(-1px)';this.style.boxShadow='0 5px 0 #0D5A70';">
+            <span style="font-size:16px;">←</span> Back to POS
+          </button>
+        </div>
+
+        <!-- Premium 3D Tabs - Topbar Style -->
+        <div style="display:flex; gap:8px; margin-bottom:14px; background:transparent; padding:0;">
+          <button class="stock-tab active" data-tab="current" style="flex:1; padding:8px 16px; background:#117594; color:#fff; border:1px solid rgba(255,255,255,0.2); border-radius:6px; cursor:pointer; font-weight:600; font-family: 'Century Gothic', 'Trebuchet MS', Arial, sans-serif; box-shadow:0 3px 0 #0D5A70, 0 4px 8px rgba(0,0,0,0.1); transition: all 0.12s ease; transform:translateY(0);" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 5px 0 #0D5A70,0 8px 16px rgba(0,0,0,0.15)';" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 3px 0 #0D5A70,0 4px 8px rgba(0,0,0,0.1)';" onmousedown="this.style.transform='translateY(2px)';this.style.boxShadow='0 1px 0 #0D5A70';" onmouseup="this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 0 #0D5A70,0 4px 8px rgba(0,0,0,0.1)';">
+            📋 Current Stock
+          </button>
+          <button class="stock-tab" data-tab="stockin" style="flex:1; padding:8px 16px; background:rgba(255,255,255,0.12); color:#117594; border:1px solid #C9E8F3; border-radius:6px; cursor:pointer; font-weight:600; font-family: 'Century Gothic', 'Trebuchet MS', Arial, sans-serif; box-shadow:0 2px 0 rgba(0,0,0,0.08), 0 4px 8px rgba(0,0,0,0.04); transition: all 0.12s ease; transform:translateY(0);" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 0 rgba(0,0,0,0.08),0 8px 16px rgba(0,0,0,0.08)';this.style.background='rgba(255,255,255,0.3)';" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 0 rgba(0,0,0,0.08),0 4px 8px rgba(0,0,0,0.04)';this.style.background='rgba(255,255,255,0.12)';" onmousedown="this.style.transform='translateY(2px)';this.style.boxShadow='0 1px 0 rgba(0,0,0,0.08)';" onmouseup="this.style.transform='translateY(-1px)';this.style.boxShadow='0 3px 0 rgba(0,0,0,0.08),0 4px 8px rgba(0,0,0,0.04)';">
+            🚚 Stock In
+          </button>
+          <button class="stock-tab" data-tab="correction" style="flex:1; padding:8px 16px; background:rgba(255,255,255,0.12); color:#117594; border:1px solid #C9E8F3; border-radius:6px; cursor:pointer; font-weight:600; font-family: 'Century Gothic', 'Trebuchet MS', Arial, sans-serif; box-shadow:0 2px 0 rgba(0,0,0,0.08), 0 4px 8px rgba(0,0,0,0.04); transition: all 0.12s ease; transform:translateY(0);" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 0 rgba(0,0,0,0.08),0 8px 16px rgba(0,0,0,0.08)';this.style.background='rgba(255,255,255,0.3)';" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 0 rgba(0,0,0,0.08),0 4px 8px rgba(0,0,0,0.04)';this.style.background='rgba(255,255,255,0.12)';" onmousedown="this.style.transform='translateY(2px)';this.style.boxShadow='0 1px 0 rgba(0,0,0,0.08)';" onmouseup="this.style.transform='translateY(-1px)';this.style.boxShadow='0 3px 0 rgba(0,0,0,0.08),0 4px 8px rgba(0,0,0,0.04)';">
+            ✏️ Correction
+          </button>
+        </div>
+
+        <!-- Current Stock Tab -->
+        <div id="stockCurrentTab" style="display:block;">
+          <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin-bottom:14px;">
+            <div style="background:#fff; border-radius:8px; padding:12px 16px; border:1px solid #DDE6EA;">
+              <div style="font-size:10px; color:#999; text-transform:uppercase;">Total Products</div>
+              <div style="font-size:22px; font-weight:700;" id="stockTotalProducts">0</div>
+            </div>
+            <div style="background:#fff; border-radius:8px; padding:12px 16px; border:1px solid #DDE6EA;">
+              <div style="font-size:10px; color:#999; text-transform:uppercase;">Low Stock</div>
+              <div style="font-size:22px; font-weight:700; color:#B45309;" id="stockLowCount">0</div>
+            </div>
+            <div style="background:#fff; border-radius:8px; padding:12px 16px; border:1px solid #DDE6EA;">
+              <div style="font-size:10px; color:#999; text-transform:uppercase;">Out of Stock</div>
+              <div style="font-size:22px; font-weight:700; color:#CC0000;" id="stockOutCount">0</div>
+            </div>
+          </div>
+          <div style="background:#fff; border-radius:8px; border:1px solid #DDE6EA; overflow:hidden;">
+            <div style="padding:10px 14px; border-bottom:1px solid #DDE6EA;">
+              <input type="text" id="stockSearch" placeholder="Search products..." style="width:100%; padding:8px 12px; border:1px solid #DDE6EA; border-radius:6px; font-size:13px; font-family:inherit; outline:none;" />
+            </div>
+            <div style="overflow-x:auto;">
+              <table style="width:100%; border-collapse:collapse; font-size:12px;">
+  <thead>
+  <tr style="background:#117594; color:#fff;">
+    <th style="padding:8px 12px; text-align:left;">Product</th>
+    <th style="padding:8px 12px; text-align:left;">Category</th>
+    <th style="padding:8px 12px; text-align:right;">Selling Price</th>
+    <th style="padding:8px 12px; text-align:right;">Stock</th>
+    <th style="padding:8px 12px; text-align:center;">Status</th>
+    <th style="padding:8px 12px; text-align:center;">Action</th>
+  </tr>
+</thead>
+                <tbody id="stockTableBody">
+                  <tr><td colspan="6" style="padding:20px; text-align:center; color:#999;">Loading...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+                <!-- Stock In Tab -->
+        <div id="stockInTab" style="display:none;">
+          <div style="background:#fff; border-radius:8px; border:1px solid #DDE6EA; padding:16px; margin-bottom:14px;">
+            <h3 style="font-size:14px; color:#0B5394; margin-bottom:12px; font-family: 'Century Gothic', 'Trebuchet MS', Arial, sans-serif;">🚚 Stock In (Purchase)</h3>
+
+            <!-- Form Row -->
+            <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-bottom:10px; align-items:end;">
+              <!-- Product -->
+              <div>
+                <label style="font-size:11px; color:#595959; font-weight:600; display:block; margin-bottom:4px; font-family: 'Century Gothic', 'Trebuchet MS', Arial, sans-serif;">Product <span style="font-size:10px; color:#117594; font-weight:400;">— OR SCAN BARCODE BELOW</span></label>
+                <input type="text" id="stockInProduct" list="stockProductList" placeholder="Type or select product..." style="width:100%; padding:8px 12px; border:1.5px solid #C9E8F3; border-radius:7px; font-size:13px; font-family: 'Century Gothic', 'Trebuchet MS', Arial, sans-serif; outline:none; box-sizing:border-box;" />
+                <datalist id="stockProductList"></datalist>
+              </div>
+              <!-- Quantity -->
+              <div>
+                <label style="font-size:11px; color:#595959; font-weight:600; display:block; margin-bottom:4px; font-family: 'Century Gothic', 'Trebuchet MS', Arial, sans-serif;">Quantity</label>
+                <input type="number" id="stockInQty" placeholder="0" style="width:100%; padding:8px 12px; border:1.5px solid #C9E8F3; border-radius:7px; font-size:13px; font-family: 'Century Gothic', 'Trebuchet MS', Arial, sans-serif; outline:none; box-sizing:border-box;" />
+              </div>
+              <!-- Total Amount -->
+              <div>
+                <label style="font-size:11px; color:#595959; font-weight:600; display:block; margin-bottom:4px; font-family: 'Century Gothic', 'Trebuchet MS', Arial, sans-serif;">Total Amount (TZS)</label>
+                <input type="number" id="stockInAmount" placeholder="0" style="width:100%; padding:8px 12px; border:1.5px solid #C9E8F3; border-radius:7px; font-size:13px; font-family: 'Century Gothic', 'Trebuchet MS', Arial, sans-serif; outline:none; box-sizing:border-box;" />
+              </div>
+            </div>
+
+            <!-- Supplier + Barcode Scanner Row -->
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px; align-items:end;">
+              <!-- Supplier -->
+              <div>
+                <label style="font-size:11px; color:#595959; font-weight:600; display:block; margin-bottom:4px; font-family: 'Century Gothic', 'Trebuchet MS', Arial, sans-serif;">Supplier</label>
+                <input type="text" id="stockInSupplier" placeholder="Supplier name..." style="width:100%; padding:8px 12px; border:1.5px solid #C9E8F3; border-radius:7px; font-size:13px; font-family: 'Century Gothic', 'Trebuchet MS', Arial, sans-serif; outline:none; box-sizing:border-box;" />
+              </div>
+              <!-- Barcode Scanner -->
+              <div>
+                <label style="font-size:11px; color:#595959; font-weight:600; display:block; margin-bottom:4px; font-family: 'Century Gothic', 'Trebuchet MS', Arial, sans-serif;">📷 Scan Barcode</label>
+                <input type="text" id="stockInBarcodeInput" placeholder="Scan barcode here..." style="width:100%; padding:8px 12px; border:1.5px dashed #C9E8F3; border-radius:7px; font-size:13px; font-family: 'Century Gothic', 'Trebuchet MS', Arial, sans-serif; outline:none; box-sizing:border-box;" onkeydown="if(event.key==='Enter'){handleStockInBarcode();}" />
+              </div>
+            </div>
+
+            <!-- Preview: Unit Price -->
+            <div id="stockInPreview" style="display:none; background:#EAF4F9; border-radius:7px; padding:10px 14px; margin-bottom:12px; font-size:13px; border:1px solid #C9E8F3; font-family: 'Century Gothic', 'Trebuchet MS', Arial, sans-serif;">
+              Unit Price: <strong id="stockInUnitPrice" style="color:#117594;">—</strong>
+            </div>
+
+            <!-- Add to Cart Button -->
+            <button id="stockInAddToCart" style="padding:10px 24px; background:#117594; color:#fff; border:none; border-radius:7px; cursor:pointer; font-weight:600; font-size:13px; font-family: 'Century Gothic', 'Trebuchet MS', Arial, sans-serif; box-shadow:0 4px 0 #0D5A70; transition:all 0.12s; margin-bottom:14px;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 0 #0D5A70';" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 0 #0D5A70';" onmousedown="this.style.transform='translateY(2px)';this.style.boxShadow='0 2px 0 #0D5A70';" onmouseup="this.style.transform='translateY(-1px)';this.style.boxShadow='0 5px 0 #0D5A70';">
+              🛒 Add to Cart
+            </button>
+          </div>
+
+          <!-- Purchase Cart -->
+          <div id="purchaseCartWrap" style="display:none; background:#fff; border-radius:8px; border:1px solid #DDE6EA; overflow:hidden; margin-bottom:14px;">
+            <div style="padding:12px 16px; background:#EAF4F9; border-bottom:1px solid #DDE6EA; display:flex; justify-content:space-between; align-items:center; font-family: 'Century Gothic', 'Trebuchet MS', Arial, sans-serif;">
+              <span style="font-weight:700; font-size:13px; color:#0B5394;">📋 Purchase Cart (<span id="purchaseCartCount">0</span> items)</span>
+            </div>
+            <div style="overflow-x:auto;">
+              <table style="width:100%; border-collapse:collapse; font-size:12px; font-family: 'Century Gothic', 'Trebuchet MS', Arial, sans-serif;">
+                <thead>
+                  <tr style="background:#117594; color:#fff;">
+                    <th style="padding:8px 12px; text-align:left;">Product</th>
+                    <th style="padding:8px 12px; text-align:center;">Qty</th>
+                    <th style="padding:8px 12px; text-align:center;">Unit Price</th>
+                    <th style="padding:8px 12px; text-align:center;">Total</th>
+                    <th style="padding:8px 12px; text-align:center;">Supplier</th>
+                    <th style="padding:8px 12px; text-align:center;">Action</th>
+                  </tr>
+                </thead>
+                <tbody id="purchaseCartBody">
+                  <tr><td colspan="6" style="padding:20px; text-align:center; color:#999;">Cart is empty</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div style="padding:12px 16px; border-top:1px solid #DDE6EA; display:flex; gap:10px; justify-content:flex-end; flex-wrap:wrap; background:#fafafa;">
+              <button id="purchaseCartReset" style="padding:8px 20px; background:#64748b; color:#fff; border:none; border-radius:6px; cursor:pointer; font-weight:600; font-size:12px; font-family: 'Century Gothic', 'Trebuchet MS', Arial, sans-serif; box-shadow:0 3px 0 #3f4854; transition:all 0.12s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 5px 0 #3f4854';" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 3px 0 #3f4854';" onmousedown="this.style.transform='translateY(2px)';this.style.boxShadow='0 1px 0 #3f4854';" onmouseup="this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 0 #3f4854';">
+                RESET
+              </button>
+              <button id="purchaseSubmitAll" style="padding:8px 24px; background:#117594; color:#fff; border:none; border-radius:6px; cursor:pointer; font-weight:600; font-size:12px; font-family: 'Century Gothic', 'Trebuchet MS', Arial, sans-serif; box-shadow:0 3px 0 #0D5A70; transition:all 0.12s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 5px 0 #0D5A70';" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 3px 0 #0D5A70';" onmousedown="this.style.transform='translateY(2px)';this.style.boxShadow='0 1px 0 #0D5A70';" onmouseup="this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 0 #0D5A70';">
+                Submit All Purchases
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Correction Tab -->
+        <div id="stockCorrectionTab" style="display:none;">
+          <div style="background:#fff; border-radius:8px; border:1px solid #DDE6EA; padding:16px; margin-bottom:14px;">
+            <h3 style="font-size:14px; color:#0B5394; margin-bottom:12px; font-family: 'Century Gothic', 'Trebuchet MS', Arial, sans-serif;">✏️ Stock Correction</h3>
+
+            <!-- Form Row -->
+            <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-bottom:10px; align-items:end;">
+              <!-- Product -->
+              <div>
+                <label style="font-size:11px; color:#595959; font-weight:600; display:block; margin-bottom:4px; font-family: 'Century Gothic', 'Trebuchet MS', Arial, sans-serif;">Product <span style="font-size:10px; color:#117594; font-weight:400;">— OR SCAN BARCODE BELOW</span></label>
+                <input type="text" id="corrProduct" list="corrProductList" placeholder="Type or select product..." style="width:100%; padding:8px 12px; border:1.5px solid #C9E8F3; border-radius:7px; font-size:13px; font-family: 'Century Gothic', 'Trebuchet MS', Arial, sans-serif; outline:none; box-sizing:border-box;" />
+                <datalist id="corrProductList"></datalist>
+              </div>
+              <!-- Quantity -->
+              <div>
+                <label style="font-size:11px; color:#595959; font-weight:600; display:block; margin-bottom:4px; font-family: 'Century Gothic', 'Trebuchet MS', Arial, sans-serif;">Quantity *</label>
+                <input type="number" id="corrQty" placeholder="0" style="width:100%; padding:8px 12px; border:1.5px solid #C9E8F3; border-radius:7px; font-size:13px; font-family: 'Century Gothic', 'Trebuchet MS', Arial, sans-serif; outline:none; box-sizing:border-box;" />
+              </div>
+              <!-- Current Stock -->
+              <div>
+                <label style="font-size:11px; color:#595959; font-weight:600; display:block; margin-bottom:4px; font-family: 'Century Gothic', 'Trebuchet MS', Arial, sans-serif;">Current Stock</label>
+                <input type="text" id="corrCurrentStock" disabled style="width:100%; padding:8px 12px; border:1.5px solid #C9E8F3; border-radius:7px; font-size:13px; font-family: 'Century Gothic', 'Trebuchet MS', Arial, sans-serif; background:#f5f5f5; color:#999; outline:none; box-sizing:border-box;" />
+              </div>
+            </div>
+
+            <!-- Correction Type + Barcode Scanner Row -->
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px; align-items:end;">
+              <!-- Correction Type -->
+              <div>
+                <label style="font-size:11px; color:#595959; font-weight:600; display:block; margin-bottom:4px; font-family: 'Century Gothic', 'Trebuchet MS', Arial, sans-serif;">Correction Type *</label>
+                <select id="corrType" style="width:100%; padding:8px 12px; border:1.5px solid #C9E8F3; border-radius:7px; font-size:13px; font-family: 'Century Gothic', 'Trebuchet MS', Arial, sans-serif; outline:none; background:#fff; box-sizing:border-box;">
+                  <option value="">-- Select Type --</option>
+                  <optgroup label="Hesabu ya Bidhaa (Audit)">
+                    <option value="Audit">Audit — set exact stock count</option>
+                  </optgroup>
+                  <optgroup label="Ongeza Bidhaa (Add Stock)">
+                    <option value="Addition">Addition — add units</option>
+                  </optgroup>
+                  <optgroup label="Punguza Bidhaa (Reduce Stock)">
+                    <option value="Damaged">Damaged</option>
+                    <option value="Expiry">Expiry</option>
+                    <option value="Lost">Lost</option>
+                    <option value="Used by Shop">Used by Shop</option>
+                    <option value="Offered">Offered</option>
+                  </optgroup>
+                </select>
+              </div>
+              <!-- Barcode Scanner -->
+              <div>
+                <label style="font-size:11px; color:#595959; font-weight:600; display:block; margin-bottom:4px; font-family: 'Century Gothic', 'Trebuchet MS', Arial, sans-serif;">📷 Scan Barcode</label>
+                <input type="text" id="corrBarcodeInput" placeholder="Scan barcode here..." style="width:100%; padding:8px 12px; border:1.5px dashed #C9E8F3; border-radius:7px; font-size:13px; font-family: 'Century Gothic', 'Trebuchet MS', Arial, sans-serif; outline:none; box-sizing:border-box;" onkeydown="if(event.key==='Enter'){handleCorrBarcode();}" />
+              </div>
+            </div>
+
+            <!-- Preview -->
+            <div id="corrPreview" style="display:none; background:#EAF4F9; border-radius:7px; padding:10px 14px; margin-bottom:12px; font-size:13px; border:1px solid #C9E8F3; font-family: 'Century Gothic', 'Trebuchet MS', Arial, sans-serif;">
+              📊 Result: <strong id="corrResult" style="color:#117594;">—</strong>
+            </div>
+
+            <!-- Add to Cart Button -->
+            <button id="corrAddToCart" style="padding:10px 24px; background:#117594; color:#fff; border:none; border-radius:7px; cursor:pointer; font-weight:600; font-size:13px; font-family: 'Century Gothic', 'Trebuchet MS', Arial, sans-serif; box-shadow:0 4px 0 #0D5A70; transition:all 0.12s; margin-bottom:14px;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 0 #0D5A70';" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 0 #0D5A70';" onmousedown="this.style.transform='translateY(2px)';this.style.boxShadow='0 2px 0 #0D5A70';" onmouseup="this.style.transform='translateY(-1px)';this.style.boxShadow='0 5px 0 #0D5A70';">
+              🛒 Add to Cart
+            </button>
+          </div>
+
+          <!-- Correction Cart -->
+          <div id="correctionCartWrap" style="display:none; background:#fff; border-radius:8px; border:1px solid #DDE6EA; overflow:hidden; margin-bottom:14px;">
+            <div style="padding:12px 16px; background:#EAF4F9; border-bottom:1px solid #DDE6EA; display:flex; justify-content:space-between; align-items:center; font-family: 'Century Gothic', 'Trebuchet MS', Arial, sans-serif;">
+              <span style="font-weight:700; font-size:13px; color:#0B5394;">📋 Correction Cart (<span id="correctionCartCount">0</span> items)</span>
+            </div>
+            <div style="overflow-x:auto;">
+              <table style="width:100%; border-collapse:collapse; font-size:12px; font-family: 'Century Gothic', 'Trebuchet MS', Arial, sans-serif;">
+                <thead>
+                  <tr style="background:#117594; color:#fff;">
+                    <th style="padding:8px 12px; text-align:left;">Product</th>
+                    <th style="padding:8px 12px; text-align:center;">Current Stock</th>
+                    <th style="padding:8px 12px; text-align:center;">Type</th>
+                    <th style="padding:8px 12px; text-align:center;">Qty</th>
+                    <th style="padding:8px 12px; text-align:center;">Action</th>
+                  </tr>
+                </thead>
+                <tbody id="correctionCartBody">
+                  <tr><td colspan="6" style="padding:20px; text-align:center; color:#999;">Cart is empty</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div style="padding:12px 16px; border-top:1px solid #DDE6EA; display:flex; gap:10px; justify-content:flex-end; flex-wrap:wrap; background:#fafafa;">
+              <button id="corrCartReset" style="padding:8px 20px; background:#64748b; color:#fff; border:none; border-radius:6px; cursor:pointer; font-weight:600; font-size:12px; font-family: 'Century Gothic', 'Trebuchet MS', Arial, sans-serif; box-shadow:0 3px 0 #3f4854; transition:all 0.12s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 5px 0 #3f4854';" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 3px 0 #3f4854';" onmousedown="this.style.transform='translateY(2px)';this.style.boxShadow='0 1px 0 #3f4854';" onmouseup="this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 0 #3f4854';">
+                RESET
+              </button>
+              <button id="corrSubmitAll" style="padding:8px 24px; background:#117594; color:#fff; border:none; border-radius:6px; cursor:pointer; font-weight:600; font-size:12px; font-family: 'Century Gothic', 'Trebuchet MS', Arial, sans-serif; box-shadow:0 3px 0 #0D5A70; transition:all 0.12s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 5px 0 #0D5A70';" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 3px 0 #0D5A70';" onmousedown="this.style.transform='translateY(2px)';this.style.boxShadow='0 1px 0 #0D5A70';" onmouseup="this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 0 #0D5A70';">
+                Submit All Corrections
+              </button>
+            </div>
+          </div>
+
+          <!-- Reset All Stock Button -->
+          <div style="display:flex; gap:8px; justify-content:flex-end; flex-wrap:wrap;">
+            <button id="resetAllStockBtn" style="display:none; padding:10px 24px; background:#CC0000; color:#fff; border:none; border-radius:7px; cursor:pointer; font-weight:600; font-size:13px; font-family: 'Century Gothic', 'Trebuchet MS', Arial, sans-serif; box-shadow:0 4px 0 #8B0000; transition:all 0.12s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 0 #8B0000';" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 0 #8B0000';" onmousedown="this.style.transform='translateY(2px)';this.style.boxShadow='0 2px 0 #8B0000';" onmouseup="this.style.transform='translateY(-1px)';this.style.boxShadow='0 5px 0 #8B0000';">
+              ⚠️ Reset All Stock
+            </button>
+          </div>
+        </div>
+        <!-- END stockCorrectionTab -->
+      </div>
+      <!-- END stockView -->
+
+                  <!-- ============================================================
+                 <!-- ============================================================
+           CASH VIEW – Two‑Column Layout
+           ============================================================ -->
+      <div id="cashView" style="display:none; flex-direction:column; height:100%; padding:16px; overflow-y:auto; gap:16px;">
+
+        <!-- Title + Back to POS (same as Debt) -->
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-shrink:0;">
+          <h2 style="color:#0B5394; margin:0; font-size:20px; text-shadow: 0 2px 4px rgba(0,0,0,0.1); font-family: 'Century Gothic', 'Trebuchet MS', Arial, sans-serif;">💵 Cash Management</h2>
+          <button onclick="showPage('pos')" style="background:#117594; color:#fff; border:none; padding:8px 18px; border-radius:6px; cursor:pointer; font-weight:600; font-size:13px; font-family: 'Century Gothic', 'Trebuchet MS', Arial, sans-serif; box-shadow:0 4px 0 #0D5A70; display:flex; align-items:center; gap:6px;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 0 #0D5A70';" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 0 #0D5A70';" onmousedown="this.style.transform='translateY(2px)';this.style.boxShadow='0 2px 0 #0D5A70';" onmouseup="this.style.transform='translateY(-1px)';this.style.boxShadow='0 5px 0 #0D5A70';">
+            <span style="font-size:16px;">←</span> Back to POS
+          </button>
+        </div>
+
+        <!-- Two‑column layout: form (30%) + log (70%) -->
+        <div style="display:flex; gap:16px; flex:1; min-height:0;">
+
+          <!-- LEFT: Form -->
+          <div style="width:30%; background:#fff; border-radius:8px; border:1px solid #DDE6EA; padding:16px; display:flex; flex-direction:column;">
+            <h3 style="font-size:14px; color:#0B5394; margin-bottom:12px; font-family: 'Century Gothic', 'Trebuchet MS', Arial, sans-serif;">Record Cash Movement</h3>
+
+            <div style="margin-bottom:12px;">
+              <label style="font-size:11px; color:#595959; font-weight:600; display:block; margin-bottom:4px; font-family: 'Century Gothic', 'Trebuchet MS', Arial, sans-serif;">Category (Swahili)</label>
+              <select id="cashCategorySelect" style="width:100%; padding:8px 12px; border:1.5px solid #C9E8F3; border-radius:7px; font-size:13px; font-family: 'Century Gothic', 'Trebuchet MS', Arial, sans-serif; outline:none; box-sizing:border-box;">
+                <option value="">-- Select Category --</option>
+              </select>
+            </div>
+
+            <div style="margin-bottom:12px;">
+              <label style="font-size:11px; color:#595959; font-weight:600; display:block; margin-bottom:4px; font-family: 'Century Gothic', 'Trebuchet MS', Arial, sans-serif;">Item (Swahili)</label>
+              <select id="cashItemSelect" disabled style="width:100%; padding:8px 12px; border:1.5px solid #C9E8F3; border-radius:7px; font-size:13px; font-family: 'Century Gothic', 'Trebuchet MS', Arial, sans-serif; outline:none; box-sizing:border-box;">
+                <option value="">-- Select Item --</option>
+              </select>
+            </div>
+
+            <div style="margin-bottom:12px;">
+              <label style="font-size:11px; color:#595959; font-weight:600; display:block; margin-bottom:4px; font-family: 'Century Gothic', 'Trebuchet MS', Arial, sans-serif;">Amount (TZS)</label>
+              <input type="number" id="cashAmountInput" placeholder="e.g. 50000" style="width:100%; padding:8px 12px; border:1.5px solid #C9E8F3; border-radius:7px; font-size:13px; font-family: 'Century Gothic', 'Trebuchet MS', Arial, sans-serif; outline:none; box-sizing:border-box;" />
+            </div>
+
+            <div style="margin-bottom:12px;">
+              <label style="font-size:11px; color:#595959; font-weight:600; display:block; margin-bottom:4px; font-family: 'Century Gothic', 'Trebuchet MS', Arial, sans-serif;">Notes (optional)</label>
+              <input type="text" id="cashNotesInput" placeholder="Any extra details..." style="width:100%; padding:8px 12px; border:1.5px solid #C9E8F3; border-radius:7px; font-size:13px; font-family: 'Century Gothic', 'Trebuchet MS', Arial, sans-serif; outline:none; box-sizing:border-box;" />
+            </div>
+
+            <!-- Flow indicator -->
+            <div id="cashFlowIndicator" class="flow-indicator" style="display:none; padding:8px 12px; border-radius:7px; font-size:13px; font-weight:600; margin-bottom:12px;"></div>
+
+            <button id="cashSubmitBtn" onclick="recordCash()" style="padding:10px 24px; background:#117594; color:#fff; border:none; border-radius:6px; cursor:pointer; font-weight:600; font-size:13px; font-family: 'Century Gothic', 'Trebuchet MS', Arial, sans-serif; box-shadow:0 3px 0 #0D5A70; align-self:flex-start;">
+              Record Movement
+            </button>
+          </div>
+
+          <!-- RIGHT: Summary + Log -->
+          <div style="flex:1; display:flex; flex-direction:column; gap:14px; min-height:0;">
+
+            <!-- Summary cards -->
+            <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:12px;">
+              <div style="background:#fff; border-radius:8px; padding:12px 16px; border:1px solid #DDE6EA;">
+                <div style="font-size:10px; color:#999; text-transform:uppercase;">Total In Today</div>
+                <div style="font-size:20px; font-weight:700; color:#1E7B34;" id="cashTotalIn">TZS 0</div>
+              </div>
+              <div style="background:#fff; border-radius:8px; padding:12px 16px; border:1px solid #DDE6EA;">
+                <div style="font-size:10px; color:#999; text-transform:uppercase;">Total Out Today</div>
+                <div style="font-size:20px; font-weight:700; color:#CC0000;" id="cashTotalOut">TZS 0</div>
+              </div>
+              <div style="background:#fff; border-radius:8px; padding:12px 16px; border:1px solid #DDE6EA;">
+                <div style="font-size:10px; color:#999; text-transform:uppercase;">Net Balance</div>
+                <div style="font-size:20px; font-weight:700; color:#117594;" id="cashNetBalance">TZS 0</div>
+              </div>
+            </div>
+
+            <!-- Log table -->
+            <div style="flex:1; background:#fff; border-radius:8px; border:1px solid #DDE6EA; overflow:hidden; display:flex; flex-direction:column; min-height:0;">
+              <div style="padding:10px 14px; background:#EAF4F9; border-bottom:1px solid #DDE6EA; font-weight:700; font-size:13px; color:#0B5394; flex-shrink:0;">Today's Cash Movements</div>
+              <div style="overflow:auto; flex:1;">
+                <table style="width:100%; border-collapse:collapse; font-size:12px; font-family: 'Century Gothic', 'Trebuchet MS', Arial, sans-serif; table-layout:fixed;">
+                  <thead>
+                    <tr style="background:#117594; color:#fff;">
+                      <th style="padding:8px 12px; text-align:left; width:20%;">Category</th>
+                      <th style="padding:8px 12px; text-align:left; width:20%;">Item</th>
+                      <th style="padding:8px 12px; text-align:center; width:10%;">Flow</th>
+                      <th style="padding:8px 12px; text-align:right; width:25%;">Amount</th>
+                      <th style="padding:8px 12px; text-align:left; width:25%;">Notes</th>
+                    </tr>
+                  </thead>
+                  <tbody id="cashLogBody">
+                    <tr><td colspan="6" style="padding:20px; text-align:center; color:#999;">No movements today.</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+          </div> <!-- END right column -->
+        </div> <!-- END two‑column layout -->
+      </div> <!-- END cashView -->
+      </div> <!-- END page-content -->
+
+<!-- ====== Cart Panel (30%) ====== -->
+    <div id="cart-panel" style="width:25%; background:#fff; border-left:1px solid #DDE6EA; overflow-y:auto;">
+      <!-- Cart loads here -->
+    </div>
+
+      <!-- ============================================================
+           DEBT VIEW
+           ============================================================ -->
+      <div id="debtsView" style="display:none; flex-direction:column; height:100%; padding:16px; overflow-y:auto; gap:16px;">
+
+        <!-- Back button -->
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-shrink:0;">
+          <h2 style="color:#0B5394; margin:0; font-size:20px; font-family: 'Century Gothic', 'Trebuchet MS', Arial, sans-serif;">💰 Debt Management</h2>
+          <button onclick="showPage('pos')" style="background:#117594; color:#fff; border:none; padding:8px 18px; border-radius:6px; cursor:pointer; font-weight:600; font-size:13px; font-family: 'Century Gothic', 'Trebuchet MS', Arial, sans-serif; box-shadow:0 4px 0 #0D5A70; display:flex; align-items:center; gap:6px;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 0 #0D5A70';" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 0 #0D5A70';" onmousedown="this.style.transform='translateY(2px)';this.style.boxShadow='0 2px 0 #0D5A70';" onmouseup="this.style.transform='translateY(-1px)';this.style.boxShadow='0 5px 0 #0D5A70';">
+            <span style="font-size:16px;">←</span> Back to POS
+          </button>
+        </div>
+
+        <!-- Summary cards -->
+        <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:12px;">
+          <div style="background:#fff; border-radius:8px; padding:12px 16px; border:1px solid #DDE6EA;">
+            <div style="font-size:10px; color:#999; text-transform:uppercase;">Total Owed</div>
+            <div style="font-size:20px; font-weight:700; color:#CC0000;" id="debtTotalOwed">TZS 0</div>
+          </div>
+          <div style="background:#fff; border-radius:8px; padding:12px 16px; border:1px solid #DDE6EA;">
+            <div style="font-size:10px; color:#999; text-transform:uppercase;">Active Debts</div>
+            <div style="font-size:20px; font-weight:700; color:#0B5394;" id="debtActiveCount">0</div>
+          </div>
+          <div style="background:#fff; border-radius:8px; padding:12px 16px; border:1px solid #DDE6EA;">
+            <div style="font-size:10px; color:#999; text-transform:uppercase;">Overdue (7+ days)</div>
+            <div style="font-size:20px; font-weight:700; color:#B45309;" id="debtOverdueCount">0</div>
+          </div>
+          <div style="background:#fff; border-radius:8px; padding:12px 16px; border:1px solid #DDE6EA;">
+            <div style="font-size:10px; color:#999; text-transform:uppercase;">Overdue Amount</div>
+            <div style="font-size:20px; font-weight:700; color:#CC0000;" id="debtOverdueAmount">TZS 0</div>
+          </div>
+        </div>
+
+        <!-- Filter bar -->
+        <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center; background:#fff; border-radius:8px; padding:8px 14px; border:1px solid #DDE6EA;">
+          <input type="text" id="debtSearch" placeholder="Search by customer..." style="flex:1; padding:8px 12px; border:1px solid #DDE6EA; border-radius:6px; font-size:13px; font-family:inherit; outline:none; min-width:150px;" />
+          <button class="filter-btn active" data-filter="all" style="padding:6px 14px; border-radius:6px; border:1px solid #DDE6EA; background:#117594; color:#fff; cursor:pointer; font-weight:600; font-family:inherit; font-size:12px;">All</button>
+          <button class="filter-btn" data-filter="overdue" style="padding:6px 14px; border-radius:6px; border:1px solid #DDE6EA; background:#fff; color:#0D5A70; cursor:pointer; font-weight:600; font-family:inherit; font-size:12px;">Overdue 🔴</button>
+          <button class="filter-btn" data-filter="pending" style="padding:6px 14px; border-radius:6px; border:1px solid #DDE6EA; background:#fff; color:#0D5A70; cursor:pointer; font-weight:600; font-family:inherit; font-size:12px;">Pending</button>
+          <button class="filter-btn" data-filter="partial" style="padding:6px 14px; border-radius:6px; border:1px solid #DDE6EA; background:#fff; color:#0D5A70; cursor:pointer; font-weight:600; font-family:inherit; font-size:12px;">Partial</button>
+        </div>
+
+        <!-- View Toggle & Date Filter -->
+<div style="display:flex; flex-wrap:wrap; gap:10px; align-items:center; background:#fff; border-radius:8px; padding:8px 14px; border:1px solid #DDE6EA; margin-top:8px;">
+  <!-- View Toggle -->
+  <div style="display:flex; gap:4px; background:#f0f0f0; border-radius:6px; padding:3px;">
+    <button class="view-btn active" data-view="single" style="padding:5px 14px; border:none; border-radius:4px; background:#117594; color:#fff; font-weight:600; font-size:12px; cursor:pointer; font-family:inherit;">Single</button>
+    <button class="view-btn" data-view="consolidated" style="padding:5px 14px; border:none; border-radius:4px; background:transparent; color:#0B5394; font-weight:600; font-size:12px; cursor:pointer; font-family:inherit;">Consolidated</button>
+  </div>
+  
+  <div style="flex:1; min-width:20px;"></div>
+  
+  <!-- Date Filter -->
+  <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap;">
+    <label style="font-size:11px; font-weight:600; color:#595959;">From:</label>
+    <input type="date" id="debtDateFrom" style="padding:4px 8px; border:1px solid #C9E8F3; border-radius:4px; font-size:12px;">
+    <label style="font-size:11px; font-weight:600; color:#595959;">To:</label>
+    <input type="date" id="debtDateTo" style="padding:4px 8px; border:1px solid #C9E8F3; border-radius:4px; font-size:12px;">
+    <button id="debtDateApply" style="padding:4px 12px; background:#117594; color:#fff; border:none; border-radius:4px; cursor:pointer; font-size:11px; font-weight:600;">Apply</button>
+    <button id="debtDateReset" style="padding:4px 12px; background:#999; color:#fff; border:none; border-radius:4px; cursor:pointer; font-size:11px; font-weight:600;">Reset</button>
+  </div>
+</div>
+
+      <!-- Admin tools – Reset Debt with Search -->
+<div style="display:flex; gap:12px; margin-top:10px; align-items:center; flex-wrap:wrap; padding:8px 0; border-top:1px solid #DDE6EA;">
+  
+  <span style="font-weight:600; color:#0B5394; font-size:13px;">⚠️ Reset Debt:</span>
+  
+  <!-- Reset All -->
+  <button onclick="resetCustomerDebt(null, true)" 
+          style="background:#CC0000; color:#fff; border:none; padding:6px 16px; border-radius:6px; cursor:pointer; font-weight:600; font-size:12px; box-shadow:0 3px 0 #8B0000; transition:all 0.12s;">
+    Reset All Customers
+  </button>
+  
+  <!-- Reset Single with Search -->
+  <div style="display:flex; align-items:center; gap:6px; background:#f9fafb; padding:4px 8px; border-radius:6px; border:1px solid #DDE6EA; position:relative;">
+    <input type="text" id="resetSingleSearch" placeholder="Search by name or card..." 
+           style="padding:6px 10px; border:1px solid #C9E8F3; border-radius:4px; font-size:12px; width:200px; outline:none;">
+    <div id="resetSingleDropdown" style="display:none; position:absolute; top:100%; left:0; right:0; background:#fff; border:1px solid #DDE6EA; max-height:150px; overflow-y:auto; z-index:10; border-radius:4px; margin-top:2px; box-shadow:0 4px 8px rgba(0,0,0,0.1);"></div>
+    <button id="resetSingleBtn" 
+            style="background:#117594; color:#fff; border:none; padding:6px 16px; border-radius:4px; cursor:pointer; font-weight:600; font-size:12px; box-shadow:0 2px 0 #0D5A70;">
+      Reset Single
+    </button>
+  </div>
+</div>
+
+        <!-- Debt table -->
+        <div style="flex:1; background:#fff; border-radius:8px; border:1px solid #DDE6EA; overflow:hidden; display:flex; flex-direction:column; min-height:0;">
+          <div style="padding:10px 14px; background:#EAF4F9; border-bottom:1px solid #DDE6EA; font-weight:700; font-size:13px; color:#0B5394; flex-shrink:0;">Outstanding Debts</div>
+          <div style="overflow:auto; flex:1;">
+            <table style="width:100%; border-collapse:collapse; font-size:12px; font-family: 'Century Gothic', 'Trebuchet MS', Arial, sans-serif; table-layout:fixed;">
+              <thead>
+                <tr style="background:#117594; color:#fff;">
+                  <th style="padding:8px 12px; text-align:left; width:15%;">Customer</th>
+                  <th style="padding:8px 12px; text-align:left; width:12%;">Phone</th>
+                  <th style="padding:8px 12px; text-align:right; width:12%;">Original</th>
+                  <th style="padding:8px 12px; text-align:right; width:12%;">Paid</th>
+                  <th style="padding:8px 12px; text-align:right; width:12%;">Balance</th>
+                  <th style="padding:8px 12px; text-align:center; width:10%;">Due Date</th>
+                  <th style="padding:8px 12px; text-align:center; width:8%;">Overdue</th>
+                  <th style="padding:8px 12px; text-align:center; width:8%;">Status</th>
+                  <th style="padding:8px 12px; text-align:center; width:11%;">Action</th>
+                </tr>
+              </thead>
+              <tbody id="debtTableBody">
+                <tr><td colspan="9" style="padding:20px; text-align:center; color:#999;">Loading debts...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div> <!-- END debtsView -->
+    
+     <!-- ============================================================
+     ANALYTICS VIEW (Enhanced UI with visible button & grid)
+     ============================================================ -->
+<div id="reportsView" style="display:none; flex-direction:column; height:100%; width:100%; padding:16px; overflow-y:auto; gap:16px; box-sizing:border-box; background:#f4f8fa;">
+
+  <!-- ─── HEADER with Back Button ─────────────────────────── -->
+  <div style="display:flex; justify-content:space-between; align-items:center; flex-shrink:0; flex-wrap:wrap; gap:8px; background:#ffffff; padding:12px 20px; border-radius:10px; border:1px solid #dde6ea; box-shadow:0 2px 6px rgba(0,0,0,0.06);">
+    <div style="display:flex; align-items:center; gap:12px;">
+      <h2 style="color:#0B5394; margin:0; font-size:24px; font-weight:800; font-family: 'Century Gothic', 'Trebuchet MS', Arial, sans-serif;">📈 Analytics</h2>
+      <span id="analyticsLastUpdated" style="font-size:11px; color:#999; font-weight:400;">Updated: just now</span>
+    </div>
+    <!-- ✅ Back to POS button - hardcoded colors for visibility -->
+    <button onclick="showPage('pos')" style="background:#117594; color:#ffffff; border:none; padding:8px 18px; border-radius:6px; cursor:pointer; font-weight:600; font-size:13px; font-family: 'Century Gothic', 'Trebuchet MS', Arial, sans-serif; box-shadow:0 4px 0 #0D5A70; transition:all 0.12s; display:flex; align-items:center; gap:6px;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 0 #0D5A70';" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 0 #0D5A70';" onmousedown="this.style.transform='translateY(2px)';this.style.boxShadow='0 2px 0 #0D5A70';" onmouseup="this.style.transform='translateY(-1px)';this.style.boxShadow='0 5px 0 #0D5A70';">
+      <span style="font-size:16px;">←</span> Back to POS
+    </button>
+  <button id="analyticsRefreshBtn" onclick="refreshAnalyticsTab()" style="background:#117594; color:#ffffff; border:none; padding:8px 18px; border-radius:6px; cursor:pointer; font-weight:600; font-size:13px; font-family: 'Century Gothic', 'Trebuchet MS', Arial, sans-serif; box-shadow:0 4px 0 #0D5A70; transition:all 0.12s; display:flex; align-items:center; gap:6px;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 0 #0D5A70';" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 0 #0D5A70';" onmousedown="this.style.transform='translateY(2px)';this.style.boxShadow='0 2px 0 #0D5A70';" onmouseup="this.style.transform='translateY(-1px)';this.style.boxShadow='0 5px 0 #0D5A70';">
+  ⟳ Refresh
+</button>  
+  </div>
+
+  <!-- ─── FILTER BAR ──────────────────────────────────────── -->
+  <div style="display:flex; flex-wrap:wrap; gap:10px; align-items:center; background:#ffffff; padding:12px 16px; border-radius:10px; border:1px solid #dde6ea; box-shadow:0 2px 6px rgba(0,0,0,0.06);">
+
+    <!-- Quick Period Buttons (with loading spinner support) -->
+<div style="display:flex; gap:4px; flex-wrap:wrap;">
+  <button class="analytics-period-btn active" data-period="today" style="padding:5px 14px; background:#117594; color:#fff; border:1px solid #117594; border-radius:20px; cursor:pointer; font-weight:600; font-size:12px; font-family:inherit; transition:all 0.15s;">
+    Today
+  </button>
+  <button class="analytics-period-btn" data-period="week" style="padding:5px 14px; background:#fff; color:#0B5394; border:1px solid #DDE6EA; border-radius:20px; cursor:pointer; font-weight:600; font-size:12px; font-family:inherit; transition:all 0.15s;">
+    Week
+  </button>
+  <button class="analytics-period-btn" data-period="month" style="padding:5px 14px; background:#fff; color:#0B5394; border:1px solid #DDE6EA; border-radius:20px; cursor:pointer; font-weight:600; font-size:12px; font-family:inherit; transition:all 0.15s;">
+    Month
+  </button>
+  <button class="analytics-period-btn" data-period="quarter" style="padding:5px 14px; background:#fff; color:#0B5394; border:1px solid #DDE6EA; border-radius:20px; cursor:pointer; font-weight:600; font-size:12px; font-family:inherit; transition:all 0.15s;">
+    Quarter
+  </button>
+  <button class="analytics-period-btn" data-period="wtd" style="padding:5px 14px; background:#fff; color:#0B5394; border:1px solid #DDE6EA; border-radius:20px; cursor:pointer; font-weight:600; font-size:12px; font-family:inherit; transition:all 0.15s;">
+    WTD
+  </button>
+  <button class="analytics-period-btn" data-period="mtd" style="padding:5px 14px; background:#fff; color:#0B5394; border:1px solid #DDE6EA; border-radius:20px; cursor:pointer; font-weight:600; font-size:12px; font-family:inherit; transition:all 0.15s;">
+    MTD
+  </button>
+  <button class="analytics-period-btn" data-period="ytd" style="padding:5px 14px; background:#fff; color:#0B5394; border:1px solid #DDE6EA; border-radius:20px; cursor:pointer; font-weight:600; font-size:12px; font-family:inherit; transition:all 0.15s;">
+    YTD
+  </button>
+</div>
+
+
+    <div style="flex:1; min-width:80px;"></div>
+
+    <!-- Loading Indicator (hidden by default) -->
+<div id="analyticsLoading" style="display:none; padding:8px 14px; background:#EAF4F9; border-radius:8px; border:1px solid #C9E8F3; text-align:center; font-size:13px; color:#117594; font-weight:600;">
+  <span class="spin" style="display:inline-block; width:14px; height:14px; border:2px solid rgba(17,117,148,0.2); border-top-color:#117594; border-radius:50%; animation: spin 0.8s linear infinite; vertical-align:middle; margin-right:8px;"></span>
+  Loading analytics data...
+</div>
+
+    <!-- Custom Date Range -->
+    <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap;">
+      <label style="font-size:12px; font-weight:600; color:#595959;">From:</label>
+      <input type="date" id="analyticsStartDate" style="padding:5px 10px; border:1px solid #C9E8F3; border-radius:6px; font-size:12px; background:#fff; color:#0B5394;">
+      <label style="font-size:12px; font-weight:600; color:#595959;">To:</label>
+      <input type="date" id="analyticsEndDate" style="padding:5px 10px; border:1px solid #C9E8F3; border-radius:6px; font-size:12px; background:#fff; color:#0B5394;">
+      <button id="analyticsApply" style="padding:5px 16px; background:#117594; color:#fff; border:none; border-radius:6px; cursor:pointer; font-weight:600; font-size:12px; box-shadow:0 2px 0 #0D5A70;">Apply</button>
+      <button id="analyticsReset" style="padding:5px 16px; background:#999; color:#fff; border:none; border-radius:6px; cursor:pointer; font-weight:600; font-size:12px; box-shadow:0 2px 0 #666;">Reset</button>
+    </div>
+
+    <!-- Product Search & Movement -->
+    <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap;">
+      <input type="text" id="analyticsProductSearch" placeholder="🔍 Search product..." style="padding:5px 10px; border:1px solid #C9E8F3; border-radius:6px; font-size:12px; background:#fff; color:#0B5394; width:150px;">
+      <select id="analyticsMovementFilter" style="padding:5px 10px; border:1px solid #C9E8F3; border-radius:6px; font-size:12px; background:#fff; color:#0B5394;">
+    <option value="all">All</option>
+    <option value="fast">Fast</option>
+    <option value="slow">Slow</option>
+    <option value="dead">Dead</option>
+</select>
+      <button id="analyticsClearFilters" style="padding:5px 12px; background:transparent; color:#CC0000; border:1px solid #CC0000; border-radius:6px; cursor:pointer; font-weight:600; font-size:11px; transition:all 0.2s;" onmouseover="this.style.background='#CC0000';this.style.color='#fff';" onmouseout="this.style.background='transparent';this.style.color='#CC0000';">✕ Clear Filters</button>
+    </div>
+  </div>
+
+    <!-- ─── TABS ────────────────────────────────────────────────── -->
+  <div style="display:flex; gap:4px; background:#ffffff; border-radius:8px; padding:4px; border:1px solid #dde6ea; flex-wrap:wrap; box-shadow:0 2px 6px rgba(0,0,0,0.04);">
+    <button class="analytics-tab active" data-tab="summary" style="padding:8px 18px; border-radius:6px; border:none; background:#117594; color:#fff; font-weight:600; font-family: 'Century Gothic', 'Trebuchet MS', Arial, sans-serif; cursor:pointer; font-size:13px;">📊 Summary</button>
+    <button class="analytics-tab" data-tab="sales" style="padding:8px 18px; border-radius:6px; border:none; background:transparent; color:#0B5394; font-weight:600; font-family: 'Century Gothic', 'Trebuchet MS', Arial, sans-serif; cursor:pointer; font-size:13px;">💰 Sales</button>
+    <button class="analytics-tab" data-tab="stock" style="padding:8px 18px; border-radius:6px; border:none; background:transparent; color:#0B5394; font-weight:600; font-family: 'Century Gothic', 'Trebuchet MS', Arial, sans-serif; cursor:pointer; font-size:13px;">📦 Stock</button>
+    <button class="analytics-tab" data-tab="cash" style="padding:8px 18px; border-radius:6px; border:none; background:transparent; color:#0B5394; font-weight:600; font-family: 'Century Gothic', 'Trebuchet MS', Arial, sans-serif; cursor:pointer; font-size:13px;">💵 Cash</button>
+    <button class="analytics-tab" data-tab="debts" style="padding:8px 18px; border-radius:6px; border:none; background:transparent; color:#0B5394; font-weight:600; font-family: 'Century Gothic', 'Trebuchet MS', Arial, sans-serif; cursor:pointer; font-size:13px;">⚠️ Debts</button>
+    <button class="analytics-tab" data-tab="products" style="padding:8px 18px; border-radius:6px; border:none; background:transparent; color:#0B5394; font-weight:600; font-family: 'Century Gothic', 'Trebuchet MS', Arial, sans-serif; cursor:pointer; font-size:13px;">🏷️ Products</button>
+    <button class="analytics-tab" data-tab="customer-analytics" 
+        style="padding:8px 18px; border-radius:6px; border:none; background:transparent; color:#0B5394; font-weight:600; font-family: 'Century Gothic', 'Trebuchet MS', Arial, sans-serif; cursor:pointer; font-size:13px;">
+  👥 Customers Info
+</button>
+  </div>
+
+    <!-- ─── PANELS ────────────────────────────────────────────── -->
+  <!-- SUMMARY PANEL -->
+  <div id="panel-summary" class="analytics-panel" style="display:block;">
+
+    <!-- ─── SUMMARY CARDS ───────────────────────────────────── -->
+    <div id="reportSummaryCards" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:14px;">
+      <div style="background:#ffffff; border-radius:10px; padding:14px 16px; border:1px solid #dde6ea; box-shadow:0 2px 6px rgba(0,0,0,0.04);">
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+          <span style="font-size:18px;">💰</span>
+          <span style="font-size:10px; color:#999; text-transform:uppercase; font-weight:600;">Total Sales</span>
+        </div>
+        <div style="font-size:24px; font-weight:800; color:#117594;" id="reportTodaySales">TZS 0</div>
+      </div>
+      <div style="background:#ffffff; border-radius:10px; padding:14px 16px; border:1px solid #dde6ea; box-shadow:0 2px 6px rgba(0,0,0,0.04);">
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+          <span style="font-size:18px;">📈</span>
+          <span style="font-size:10px; color:#999; text-transform:uppercase; font-weight:600;">Total Profit</span>
+        </div>
+        <div style="font-size:24px; font-weight:800; color:#1E7B34;" id="reportTodayProfit">TZS 0</div>
+      </div>
+      <div style="background:#ffffff; border-radius:10px; padding:14px 16px; border:1px solid #dde6ea; box-shadow:0 2px 6px rgba(0,0,0,0.04);">
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+          <span style="font-size:18px;">💵</span>
+          <span style="font-size:10px; color:#999; text-transform:uppercase; font-weight:600;">Cash In / Out</span>
+        </div>
+        <div style="font-size:20px; font-weight:700; color:#0B5394;" id="reportCashFlow">TZS 0 / TZS 0</div>
+      </div>
+      <div style="background:#ffffff; border-radius:10px; padding:14px 16px; border:1px solid #dde6ea; box-shadow:0 2px 6px rgba(0,0,0,0.04);">
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+          <span style="font-size:18px;">⚖️</span>
+          <span style="font-size:10px; color:#999; text-transform:uppercase; font-weight:600;">Net Cash</span>
+        </div>
+        <div style="font-size:24px; font-weight:800; color:#B45309;" id="reportNetCash">TZS 0</div>
+      </div>
+      <div style="background:#ffffff; border-radius:10px; padding:14px 16px; border:1px solid #dde6ea; box-shadow:0 2px 6px rgba(0,0,0,0.04);">
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+          <span style="font-size:18px;">🛒</span>
+          <span style="font-size:10px; color:#999; text-transform:uppercase; font-weight:600;">Transactions</span>
+        </div>
+        <div style="font-size:24px; font-weight:800; color:#0B5394;" id="reportTransactionCount">0</div>
+      </div>
+      <div style="background:#ffffff; border-radius:10px; padding:14px 16px; border:1px solid #dde6ea; box-shadow:0 2px 6px rgba(0,0,0,0.04);">
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+          <span style="font-size:18px;">📊</span>
+          <span style="font-size:10px; color:#999; text-transform:uppercase; font-weight:600;">Avg Order Value</span>
+        </div>
+        <div style="font-size:24px; font-weight:800; color:#117594;" id="reportAvgOrder">TZS 0</div>
+      </div>
+    </div>
+
+
+    <!-- ─── THREE‑PERIOD COMPARISON (Table Layout) ────────────── -->
+<div id="comparisonSection" style="background:#ffffff; border-radius:10px; border:1px solid #dde6ea; overflow:hidden; box-shadow:0 2px 6px rgba(0,0,0,0.04);">
+  <div style="padding:12px 16px; background:#EAF4F9; border-bottom:1px solid #dde6ea; display:flex; justify-content:space-between; align-items:center;">
+    <span style="font-weight:700; font-size:14px; color:#0B5394;">📊 Period Comparison</span>
+    <span id="comparisonPeriodLabel" style="font-size:12px; color:#999;">Today</span>
+  </div>
+
+  <div style="overflow-x:auto; padding:10px 14px;">
+    <table style="width:100%; border-collapse:collapse; font-size:14px;">
+      <thead>
+        <tr style="background:#f5f5f5;">
+          <th style="padding:10px 12px; text-align:left; border-bottom:2px solid #dde6ea; font-weight:700; color:#0B5394;">Metric</th>
+          <th id="compHeaderToday" style="padding:10px 12px; text-align:center; border-bottom:2px solid #dde6ea; font-weight:700; color:#0B5394;">📅 Today</th>
+          <th id="compHeaderYesterday" style="padding:10px 12px; text-align:center; border-bottom:2px solid #dde6ea; font-weight:700; color:#0B5394;">📅 Yesterday</th>
+          <th id="compHeaderBefore" style="padding:10px 12px; text-align:center; border-bottom:2px solid #dde6ea; font-weight:700; color:#0B5394;">📅 Day Before</th>
+          <th style="padding:10px 12px; text-align:center; border-bottom:2px solid #dde6ea; font-weight:700; color:#0B5394;">Cur. Change</th>
+          <th style="padding:10px 12px; text-align:center; border-bottom:2px solid #dde6ea; font-weight:700; color:#0B5394;">Prev. Change</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Sales -->
+        <tr>
+          <td style="padding:8px 12px; border-bottom:1px solid #eef0f2; font-weight:700; color:#333;">Sales</td>
+          <td style="padding:8px 12px; text-align:center; border-bottom:1px solid #eef0f2; font-weight:700; color:#117594;" id="compSalesToday">TZS 0</td>
+          <td style="padding:8px 12px; text-align:center; border-bottom:1px solid #eef0f2; font-weight:700; color:#117594;" id="compSalesYesterday">TZS 0</td>
+          <td style="padding:8px 12px; text-align:center; border-bottom:1px solid #eef0f2; font-weight:700; color:#117594;" id="compSalesBefore">TZS 0</td>
+          <td style="padding:8px 12px; text-align:center; border-bottom:1px solid #eef0f2; font-weight:700; color:#1E7B34;" id="compSalesTrend">▲ +5.2%</td>
+          <td style="padding:8px 12px; text-align:center; border-bottom:1px solid #eef0f2; font-weight:700; color:#1E7B34;" id="compSalesPrevChange">▲ +2.1%</td>
+        </tr>
+        <!-- Gross Profit -->
+        <tr>
+          <td style="padding:8px 12px; border-bottom:1px solid #eef0f2; font-weight:700; color:#333;">Gross Profit</td>
+          <td style="padding:8px 12px; text-align:center; border-bottom:1px solid #eef0f2; font-weight:700; color:#1E7B34;" id="compProfitToday">TZS 0</td>
+          <td style="padding:8px 12px; text-align:center; border-bottom:1px solid #eef0f2; font-weight:700; color:#1E7B34;" id="compProfitYesterday">TZS 0</td>
+          <td style="padding:8px 12px; text-align:center; border-bottom:1px solid #eef0f2; font-weight:700; color:#1E7B34;" id="compProfitBefore">TZS 0</td>
+          <td style="padding:8px 12px; text-align:center; border-bottom:1px solid #eef0f2; font-weight:700; color:#1E7B34;" id="compProfitTrend">▲ +3.2%</td>
+          <td style="padding:8px 12px; text-align:center; border-bottom:1px solid #eef0f2; font-weight:700; color:#1E7B34;" id="compProfitPrevChange">▲ +1.1%</td>
+        </tr>
+        <!-- WAC -->
+        <tr>
+          <td style="padding:8px 12px; border-bottom:1px solid #eef0f2; font-weight:700; color:#333;">WAC</td>
+          <td style="padding:8px 12px; text-align:center; border-bottom:1px solid #eef0f2; font-weight:700; color:#B45309;" id="compWACToday">TZS 0</td>
+          <td style="padding:8px 12px; text-align:center; border-bottom:1px solid #eef0f2; font-weight:700; color:#B45309;" id="compWACYesterday">TZS 0</td>
+          <td style="padding:8px 12px; text-align:center; border-bottom:1px solid #eef0f2; font-weight:700; color:#B45309;" id="compWACBefore">TZS 0</td>
+          <td style="padding:8px 12px; text-align:center; border-bottom:1px solid #eef0f2; font-weight:700; color:#B45309;" id="compWACTrend">▼ -1.2%</td>
+          <td style="padding:8px 12px; text-align:center; border-bottom:1px solid #eef0f2; font-weight:700; color:#B45309;" id="compWACPrevChange">▼ -0.8%</td>
+        </tr>
+        <!-- Expenses -->
+        <tr>
+          <td style="padding:8px 12px; border-bottom:1px solid #eef0f2; font-weight:700; color:#333;">Expenses</td>
+          <td style="padding:8px 12px; text-align:center; border-bottom:1px solid #eef0f2; font-weight:700; color:#CC0000;" id="compExpensesToday">TZS 0</td>
+          <td style="padding:8px 12px; text-align:center; border-bottom:1px solid #eef0f2; font-weight:700; color:#CC0000;" id="compExpensesYesterday">TZS 0</td>
+          <td style="padding:8px 12px; text-align:center; border-bottom:1px solid #eef0f2; font-weight:700; color:#CC0000;" id="compExpensesBefore">TZS 0</td>
+          <td style="padding:8px 12px; text-align:center; border-bottom:1px solid #eef0f2; font-weight:700; color:#CC0000;" id="compExpensesTrend">▲ +4.0%</td>
+          <td style="padding:8px 12px; text-align:center; border-bottom:1px solid #eef0f2; font-weight:700; color:#CC0000;" id="compExpensesPrevChange">▲ +1.5%</td>
+        </tr>
+        <!-- Net Profit -->
+        <tr>
+          <td style="padding:8px 12px; font-weight:700; color:#333;">Net Profit</td>
+          <td style="padding:8px 12px; text-align:center; font-weight:700; color:#0B5394;" id="compNetProfitToday">TZS 0</td>
+          <td style="padding:8px 12px; text-align:center; font-weight:700; color:#0B5394;" id="compNetProfitYesterday">TZS 0</td>
+          <td style="padding:8px 12px; text-align:center; font-weight:700; color:#0B5394;" id="compNetProfitBefore">TZS 0</td>
+          <td style="padding:8px 12px; text-align:center; font-weight:700; color:#0B5394;" id="compNetProfitTrend">▲ +6.8%</td>
+          <td style="padding:8px 12px; text-align:center; font-weight:700; color:#0B5394;" id="compNetProfitPrevChange">▲ +3.0%</td>
+        </tr>
+        <!-- Opening Cash -->
+<tr class="premium-row">
+  <td style="padding:8px 12px; border-bottom:1px solid #eef0f2; font-weight:700; color:#0B5394; background:#f5f8fa; border-left:3px solid #117594;">🔑 Opening Cash</td>
+  <td style="padding:8px 12px; text-align:center; border-bottom:1px solid #eef0f2; font-weight:700; color:#0B5394; background:#f5f8fa;" id="compOpeningToday">TZS 0</td>
+  <td style="padding:8px 12px; text-align:center; border-bottom:1px solid #eef0f2; font-weight:700; color:#0B5394; background:#f5f8fa;" id="compOpeningYesterday">TZS 0</td>
+  <td style="padding:8px 12px; text-align:center; border-bottom:1px solid #eef0f2; font-weight:700; color:#0B5394; background:#f5f8fa;" id="compOpeningBefore">TZS 0</td>
+  <td style="padding:8px 12px; text-align:center; border-bottom:1px solid #eef0f2; font-weight:700; color:#1E7B34; background:#f5f8fa;" id="compOpeningTrend">▲ +5.2%</td>
+  <td style="padding:8px 12px; text-align:center; border-bottom:1px solid #eef0f2; font-weight:700; color:#1E7B34; background:#f5f8fa;" id="compOpeningPrevChange">▲ +2.1%</td>
+</tr>
+
+<!-- Stock In -->
+<tr class="premium-row">
+  <td style="padding:8px 12px; border-bottom:1px solid #eef0f2; font-weight:700; color:#B45309; background:#f5f8fa; border-left:3px solid #B45309;">📦 Stock In</td>
+  <td style="padding:8px 12px; text-align:center; border-bottom:1px solid #eef0f2; font-weight:700; color:#B45309; background:#f5f8fa;" id="compStockInToday">TZS 0</td>
+  <td style="padding:8px 12px; text-align:center; border-bottom:1px solid #eef0f2; font-weight:700; color:#B45309; background:#f5f8fa;" id="compStockInYesterday">TZS 0</td>
+  <td style="padding:8px 12px; text-align:center; border-bottom:1px solid #eef0f2; font-weight:700; color:#B45309; background:#f5f8fa;" id="compStockInBefore">TZS 0</td>
+  <td style="padding:8px 12px; text-align:center; border-bottom:1px solid #eef0f2; font-weight:700; color:#1E7B34; background:#f5f8fa;" id="compStockInTrend">▲ +5.2%</td>
+  <td style="padding:8px 12px; text-align:center; border-bottom:1px solid #eef0f2; font-weight:700; color:#1E7B34; background:#f5f8fa;" id="compStockInPrevChange">▲ +2.1%</td>
+</tr>
+
+<!-- Closing Cash -->
+<tr class="premium-row">
+  <td style="padding:8px 12px; border-bottom:1px solid #eef0f2; font-weight:700; color:#117594; background:#f5f8fa; border-left:3px solid #117594;">💰 Closing Cash</td>
+  <td style="padding:8px 12px; text-align:center; border-bottom:1px solid #eef0f2; font-weight:700; color:#117594; background:#f5f8fa;" id="compClosingToday">TZS 0</td>
+  <td style="padding:8px 12px; text-align:center; border-bottom:1px solid #eef0f2; font-weight:700; color:#117594; background:#f5f8fa;" id="compClosingYesterday">TZS 0</td>
+  <td style="padding:8px 12px; text-align:center; border-bottom:1px solid #eef0f2; font-weight:700; color:#117594; background:#f5f8fa;" id="compClosingBefore">TZS 0</td>
+  <td style="padding:8px 12px; text-align:center; border-bottom:1px solid #eef0f2; font-weight:700; color:#1E7B34; background:#f5f8fa;" id="compClosingTrend">▲ +5.2%</td>
+  <td style="padding:8px 12px; text-align:center; border-bottom:1px solid #eef0f2; font-weight:700; color:#1E7B34; background:#f5f8fa;" id="compClosingPrevChange">▲ +2.1%</td>
+</tr>
+
+<!-- Expected Closing Cash -->
+<tr class="premium-row">
+  <td style="padding:8px 12px; border-bottom:1px solid #eef0f2; font-weight:700; color:#0B5394; background:#f5f8fa; border-left:3px solid #0B5394;">📋 Expected Closing Cash</td>
+  <td style="padding:8px 12px; text-align:center; border-bottom:1px solid #eef0f2; font-weight:700; color:#0B5394; background:#f5f8fa;" id="compExpectedToday">TZS 0</td>
+  <td style="padding:8px 12px; text-align:center; border-bottom:1px solid #eef0f2; font-weight:700; color:#0B5394; background:#f5f8fa;" id="compExpectedYesterday">TZS 0</td>
+  <td style="padding:8px 12px; text-align:center; border-bottom:1px solid #eef0f2; font-weight:700; color:#0B5394; background:#f5f8fa;" id="compExpectedBefore">TZS 0</td>
+  <td style="padding:8px 12px; text-align:center; border-bottom:1px solid #eef0f2; font-weight:700; color:#1E7B34; background:#f5f8fa;" id="compExpectedTrend">▲ +5.2%</td>
+  <td style="padding:8px 12px; text-align:center; border-bottom:1px solid #eef0f2; font-weight:700; color:#1E7B34; background:#f5f8fa;" id="compExpectedPrevChange">▲ +2.1%</td>
+</tr>
+
+<!-- Cash Generated -->
+<tr class="premium-row">
+  <td style="padding:8px 12px; border-bottom:1px solid #eef0f2; font-weight:700; color:#1E7B34; background:#f5f8fa; border-left:3px solid #1E7B34;">💹 Cash Generated</td>
+  <td style="padding:8px 12px; text-align:center; border-bottom:1px solid #eef0f2; font-weight:700; color:#1E7B34; background:#f5f8fa;" id="compCashGeneratedToday">TZS 0</td>
+  <td style="padding:8px 12px; text-align:center; border-bottom:1px solid #eef0f2; font-weight:700; color:#1E7B34; background:#f5f8fa;" id="compCashGeneratedYesterday">TZS 0</td>
+  <td style="padding:8px 12px; text-align:center; border-bottom:1px solid #eef0f2; font-weight:700; color:#1E7B34; background:#f5f8fa;" id="compCashGeneratedBefore">TZS 0</td>
+  <td style="padding:8px 12px; text-align:center; border-bottom:1px solid #eef0f2; font-weight:700; color:#1E7B34; background:#f5f8fa;" id="compCashGeneratedTrend">▲ +5.2%</td>
+  <td style="padding:8px 12px; text-align:center; border-bottom:1px solid #eef0f2; font-weight:700; color:#1E7B34; background:#f5f8fa;" id="compCashGeneratedPrevChange">▲ +2.1%</td>
+</tr>
+
+<!-- Variance -->
+<tr class="premium-row">
+  <td style="padding:8px 12px; border-bottom:1px solid #eef0f2; font-weight:700; color:#CC0000; background:#f5f8fa; border-left:3px solid #CC0000;">📊 Variance</td>
+  <td style="padding:8px 12px; text-align:center; border-bottom:1px solid #eef0f2; font-weight:700; color:#CC0000; background:#f5f8fa;" id="compVarianceToday">TZS 0</td>
+  <td style="padding:8px 12px; text-align:center; border-bottom:1px solid #eef0f2; font-weight:700; color:#CC0000; background:#f5f8fa;" id="compVarianceYesterday">TZS 0</td>
+  <td style="padding:8px 12px; text-align:center; border-bottom:1px solid #eef0f2; font-weight:700; color:#CC0000; background:#f5f8fa;" id="compVarianceBefore">TZS 0</td>
+  <td style="padding:8px 12px; text-align:center; border-bottom:1px solid #eef0f2; font-weight:700; color:#1E7B34; background:#f5f8fa;" id="compVarianceTrend">▲ +5.2%</td>
+  <td style="padding:8px 12px; text-align:center; border-bottom:1px solid #eef0f2; font-weight:700; color:#1E7B34; background:#f5f8fa;" id="compVariancePrevChange">▲ +2.1%</td>
+</tr>
+
+<!-- Faida Lipa -->
+<tr class="premium-row">
+  <td style="padding:8px 12px; border-bottom:1px solid #eef0f2; font-weight:700; color:#0B5394; background:#f5f8fa; border-left:3px solid #0B5394;">💰 Faida : Lipa & Wakala</td>
+  <td style="padding:8px 12px; text-align:center; border-bottom:1px solid #eef0f2; font-weight:700; color:#0B5394; background:#f5f8fa;" id="compFaidalLipaToday">TZS 0</td>
+  <td style="padding:8px 12px; text-align:center; border-bottom:1px solid #eef0f2; font-weight:700; color:#0B5394; background:#f5f8fa;" id="compFaidalLipaYesterday">TZS 0</td>
+  <td style="padding:8px 12px; text-align:center; border-bottom:1px solid #eef0f2; font-weight:700; color:#0B5394; background:#f5f8fa;" id="compFaidalLipaBefore">TZS 0</td>
+  <td style="padding:8px 12px; text-align:center; border-bottom:1px solid #eef0f2; font-weight:700; color:#1E7B34; background:#f5f8fa;" id="compFaidalLipaTrend">▲ +0.0%</td>
+  <td style="padding:8px 12px; text-align:center; border-bottom:1px solid #eef0f2; font-weight:700; color:#1E7B34; background:#f5f8fa;" id="compFaidalLipaPrevChange">▲ +0.0%</td>
+</tr>
+
+<!-- Faida Simu/Chaji -->
+<tr class="premium-row">
+  <td style="padding:8px 12px; border-bottom:1px solid #eef0f2; font-weight:700; color:#0B5394; background:#f5f8fa; border-left:3px solid #0B5394;">📱 Faida : Simu/Chaji</td>
+  <td style="padding:8px 12px; text-align:center; border-bottom:1px solid #eef0f2; font-weight:700; color:#0B5394; background:#f5f8fa;" id="compFaidalSimuToday">TZS 0</td>
+  <td style="padding:8px 12px; text-align:center; border-bottom:1px solid #eef0f2; font-weight:700; color:#0B5394; background:#f5f8fa;" id="compFaidalSimuYesterday">TZS 0</td>
+  <td style="padding:8px 12px; text-align:center; border-bottom:1px solid #eef0f2; font-weight:700; color:#0B5394; background:#f5f8fa;" id="compFaidalSimuBefore">TZS 0</td>
+  <td style="padding:8px 12px; text-align:center; border-bottom:1px solid #eef0f2; font-weight:700; color:#1E7B34; background:#f5f8fa;" id="compFaidalSimuTrend">▲ +0.0%</td>
+  <td style="padding:8px 12px; text-align:center; border-bottom:1px solid #eef0f2; font-weight:700; color:#1E7B34; background:#f5f8fa;" id="compFaidalSimuPrevChange">▲ +0.0%</td>
+</tr>
+
+<!-- Faida Gesi -->
+<tr class="premium-row">
+  <td style="padding:8px 12px; border-bottom:1px solid #eef0f2; font-weight:700; color:#0B5394; background:#f5f8fa; border-left:3px solid #0B5394;">🔥 Faida : Gesi</td>
+  <td style="padding:8px 12px; text-align:center; border-bottom:1px solid #eef0f2; font-weight:700; color:#0B5394; background:#f5f8fa;" id="compFaidalGesiToday">TZS 0</td>
+  <td style="padding:8px 12px; text-align:center; border-bottom:1px solid #eef0f2; font-weight:700; color:#0B5394; background:#f5f8fa;" id="compFaidalGesiYesterday">TZS 0</td>
+  <td style="padding:8px 12px; text-align:center; border-bottom:1px solid #eef0f2; font-weight:700; color:#0B5394; background:#f5f8fa;" id="compFaidalGesiBefore">TZS 0</td>
+  <td style="padding:8px 12px; text-align:center; border-bottom:1px solid #eef0f2; font-weight:700; color:#1E7B34; background:#f5f8fa;" id="compFaidalGesiTrend">▲ +0.0%</td>
+  <td style="padding:8px 12px; text-align:center; border-bottom:1px solid #eef0f2; font-weight:700; color:#1E7B34; background:#f5f8fa;" id="compFaidalGesiPrevChange">▲ +0.0%</td>
+</tr>
+
+      </tbody>
+    </table>
+  </div>
+</div>
+<!-- END COMPARISON SECTION -->
+
+
+    <!-- ─── TABLES (Top Products + Recent Sales) ──────────────── -->
+    <div style="display:flex; gap:16px; flex:1; min-height:0; flex-wrap:wrap;">
+
+      <!-- Top 5 Products -->
+      <div style="flex:1; min-width:280px; background:#ffffff; border-radius:10px; border:1px solid #dde6ea; overflow:hidden; display:flex; flex-direction:column; min-height:0; box-shadow:0 2px 6px rgba(0,0,0,0.04);">
+        <div style="padding:12px 16px; background:#EAF4F9; border-bottom:1px solid #dde6ea; font-weight:700; font-size:14px; color:#0B5394; display:flex; justify-content:space-between; align-items:center;">
+          <span>🏆 Top 5 Selling Products</span>
+          <button onclick="exportAnalyticsCSV('top_products')" style="padding:3px 12px; background:#117594; color:#fff; border:none; border-radius:4px; cursor:pointer; font-size:11px; font-weight:600;">📥 CSV</button>
+        </div>
+        <div style="overflow:auto; flex:1;">
+          <table style="width:100%; border-collapse:collapse; font-size:13px;">
+            <thead>
+              <thead>
+  <tr style="background:#117594; color:#fff;">
+    <th style="padding:10px 14px; text-align:left;">Product</th>
+    <th style="padding:10px 14px; text-align:right;">Qty Sold</th>
+    <th style="padding:10px 14px; text-align:right;">Revenue</th>
+    <th style="padding:10px 14px; text-align:right;">Prev. Revenue</th>
+    <th style="padding:10px 14px; text-align:center;">Change %</th>
+    <th style="padding:10px 14px; text-align:center;">Trend</th>
+  </tr>
+</thead>
+            <tbody id="reportTopProducts">
+              <tr><td colspan="3" style="padding:30px; text-align:center; color:#999;">No sales in this period.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Recent Sales -->
+      <div style="flex:2; min-width:300px; background:#ffffff; border-radius:10px; border:1px solid #dde6ea; overflow:hidden; display:flex; flex-direction:column; min-height:0; box-shadow:0 2px 6px rgba(0,0,0,0.04);">
+        <div style="padding:12px 16px; background:#EAF4F9; border-bottom:1px solid #dde6ea; font-weight:700; font-size:14px; color:#0B5394; display:flex; justify-content:space-between; align-items:center;">
+          <span>🕒 Recent Sales</span>
+          <button onclick="exportAnalyticsCSV('recent_sales')" style="padding:3px 12px; background:#117594; color:#fff; border:none; border-radius:4px; cursor:pointer; font-size:11px; font-weight:600;">📥 CSV</button>
+        </div>
+        <div style="overflow:auto; flex:1;">
+          <table style="width:100%; border-collapse:collapse; font-size:12px;">
+            <thead>
+              <tr style="background:#117594; color:#fff;">
+                <th style="padding:10px 14px; text-align:left;">Date</th>
+                <th style="padding:10px 14px; text-align:left;">Customer</th>
+                <th style="padding:10px 14px; text-align:right;">Total</th>
+                <th style="padding:10px 14px; text-align:right;">Profit</th>
+                <th style="padding:10px 14px; text-align:center;">Status</th>
+              </tr>
+            </thead>
+            <tbody id="reportRecentSales">
+              <tr><td colspan="6" style="padding:30px; text-align:center; color:#999;">No sales in this period.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- END SUMMARY PANEL -->
+
+    <!-- ─── SALES PANEL ────────────────────────────────────────── -->
+  <div id="panel-sales" class="analytics-panel" style="display:none; flex-direction:column; gap:16px;">
+    <!-- Sales Summary Cards -->
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px;">
+      <div style="background:#ffffff; border-radius:10px; padding:12px 16px; border:1px solid #dde6ea; box-shadow:0 2px 6px rgba(0,0,0,0.04);">
+        <div style="font-size:10px; color:#999; text-transform:uppercase;">Revenue</div>
+        <div style="font-size:22px; font-weight:800; color:#117594;" id="salesRevenue">TZS 0</div>
+      </div>
+      <div style="background:#ffffff; border-radius:10px; padding:12px 16px; border:1px solid #dde6ea; box-shadow:0 2px 6px rgba(0,0,0,0.04);">
+        <div style="font-size:10px; color:#999; text-transform:uppercase;">Profit</div>
+        <div style="font-size:22px; font-weight:800; color:#1E7B34;" id="salesProfit">TZS 0</div>
+      </div>
+      <div style="background:#ffffff; border-radius:10px; padding:12px 16px; border:1px solid #dde6ea; box-shadow:0 2px 6px rgba(0,0,0,0.04);">
+        <div style="font-size:10px; color:#999; text-transform:uppercase;">Margin</div>
+        <div style="font-size:22px; font-weight:800; color:#B45309;" id="salesMargin">0%</div>
+      </div>
+      <div style="background:#ffffff; border-radius:10px; padding:12px 16px; border:1px solid #dde6ea; box-shadow:0 2px 6px rgba(0,0,0,0.04);">
+        <div style="font-size:10px; color:#999; text-transform:uppercase;">Transactions</div>
+        <div style="font-size:22px; font-weight:800; color:#0B5394;" id="salesTransactions">0</div>
+      </div>
+      <div style="background:#ffffff; border-radius:10px; padding:12px 16px; border:1px solid #dde6ea; box-shadow:0 2px 6px rgba(0,0,0,0.04);">
+        <div style="font-size:10px; color:#999; text-transform:uppercase;">Avg Order Value</div>
+        <div style="font-size:22px; font-weight:800; color:#117594;" id="salesAvgOrder">TZS 0</div>
+      </div>
+    </div>
+
+    <!-- Daily Sales Trend Table -->
+    <div style="background:#ffffff; border-radius:10px; border:1px solid #dde6ea; overflow:hidden; box-shadow:0 2px 6px rgba(0,0,0,0.04);">
+      <div style="padding:10px 16px; background:#EAF4F9; border-bottom:1px solid #dde6ea; font-weight:700; font-size:14px; color:#0B5394; display:flex; justify-content:space-between; align-items:center;">
+        <span>📈 Daily Sales Trend</span>
+        <button onclick="exportAnalyticsCSV('sales_trend')" style="padding:3px 12px; background:#117594; color:#fff; border:none; border-radius:4px; cursor:pointer; font-size:11px; font-weight:600;">📥 CSV</button>
+      </div>
+      <div style="overflow-x:auto;">
+        <table style="width:100%; border-collapse:collapse; font-size:13px;">
+          <thead>
+            <tr style="background:#117594; color:#fff;">
+              <th style="padding:10px 14px; text-align:left;">Date</th>
+              <th style="padding:10px 14px; text-align:right;">Revenue</th>
+              <th style="padding:10px 14px; text-align:right;">Profit</th>
+              <th style="padding:10px 14px; text-align:right;">Margin</th>
+            </tr>
+          </thead>
+          <tbody id="salesTrendBody">
+            <tr><td colspan="4" style="padding:20px; text-align:center; color:#999;">No data in this period.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Payment Method Breakdown -->
+    <div style="background:#ffffff; border-radius:10px; border:1px solid #dde6ea; overflow:hidden; box-shadow:0 2px 6px rgba(0,0,0,0.04);">
+      <div style="padding:10px 16px; background:#EAF4F9; border-bottom:1px solid #dde6ea; font-weight:700; font-size:14px; color:#0B5394; display:flex; justify-content:space-between; align-items:center;">
+        <span>💳 Payment Methods</span>
+        <button onclick="exportAnalyticsCSV('payment_methods')" style="padding:3px 12px; background:#117594; color:#fff; border:none; border-radius:4px; cursor:pointer; font-size:11px; font-weight:600;">📥 CSV</button>
+      </div>
+      <div style="overflow-x:auto;">
+        <table style="width:100%; border-collapse:collapse; font-size:13px;">
+          <thead>
+            <tr style="background:#117594; color:#fff;">
+              <th style="padding:10px 14px; text-align:left;">Method</th>
+              <th style="padding:10px 14px; text-align:right;">Count</th>
+              <th style="padding:10px 14px; text-align:right;">Total Amount</th>
+              <th style="padding:10px 14px; text-align:right;">% of Sales</th>
+            </tr>
+          </thead>
+          <tbody id="paymentMethodsBody">
+            <tr><td colspan="4" style="padding:20px; text-align:center; color:#999;">No data in this period.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ─── Sales Transactions (Detailed) – NOW INSIDE PANEL ─── -->
+    <div style="background:#ffffff; border-radius:10px; border:1px solid #dde6ea; overflow:hidden; box-shadow:0 2px 6px rgba(0,0,0,0.04);">
+      <div style="padding:10px 16px; background:#EAF4F9; border-bottom:1px solid #dde6ea; font-weight:700; font-size:14px; color:#0B5394; display:flex; justify-content:space-between; align-items:center;">
+        <span>📋 Sales Transactions</span>
+        <button onclick="exportAnalyticsCSV('sales_transactions')" style="padding:3px 12px; background:#117594; color:#fff; border:none; border-radius:4px; cursor:pointer; font-size:11px; font-weight:600;">📥 CSV</button>
+      </div>
+      <div style="overflow-x:auto;">
+        <table style="width:100%; border-collapse:collapse; font-size:13px;">
+          <thead>
+            <tr style="background:#117594; color:#fff;">
+              <th style="padding:8px 12px; text-align:left;">Date</th>
+              <th style="padding:8px 12px; text-align:left;">Product</th>
+              <th style="padding:8px 12px; text-align:left;">Category</th>
+              <th style="padding:8px 12px; text-align:left;">Customer</th>
+              <th style="padding:8px 12px; text-align:left;">Card</th>
+              <th style="padding:8px 12px; text-align:right;">Qty</th>
+              <th style="padding:8px 12px; text-align:right;">Unit Price</th>
+              <th style="padding:8px 12px; text-align:right;">Total</th>
+              <th style="padding:8px 12px; text-align:center;">Payment</th>
+              <th style="padding:8px 12px; text-align:right;">Points Earned</th>
+              <th style="padding:8px 12px; text-align:right;">Points Used</th>
+              <th style="padding:8px 12px; text-align:right;">Points Remaining</th>
+              <th style="padding:8px 12px; text-align:center;">Movement</th>
+              <th style="padding:8px 12px; text-align:center;">Proposal</th>
+            </tr>
+          </thead>
+          <tbody id="salesTransactionBody">
+            <tr><td colspan="14" style="padding:20px; text-align:center; color:#999;">Loading sales transactions...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <!-- END SALES PANEL -->
+
+    <!-- ─── STOCK PANEL ────────────────────────────────────────── -->
+<div id="panel-stock" class="analytics-panel" style="display:none; flex-direction:column; gap:16px;">
+
+  <!-- Summary Cards (always visible) -->
+  <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px;">
+    <div style="background:#ffffff; border-radius:10px; padding:12px 16px; border:1px solid #dde6ea; box-shadow:0 2px 6px rgba(0,0,0,0.04);">
+      <div style="font-size:10px; color:#999; text-transform:uppercase;">Total Products</div>
+      <div style="font-size:22px; font-weight:800; color:#0B5394;" id="analyticsStockTotalProducts">0</div>
+    </div>
+    <div style="background:#ffffff; border-radius:10px; padding:12px 16px; border:1px solid #dde6ea; box-shadow:0 2px 6px rgba(0,0,0,0.04);">
+      <div style="font-size:10px; color:#999; text-transform:uppercase;">Total Stock Units</div>
+      <div style="font-size:22px; font-weight:800; color:#117594;" id="analyticsStockTotalUnits">0</div>
+    </div>
+    <div style="background:#ffffff; border-radius:10px; padding:12px 16px; border:1px solid #dde6ea; box-shadow:0 2px 6px rgba(0,0,0,0.04);">
+      <div style="font-size:10px; color:#999; text-transform:uppercase;">Low Stock (≤5)</div>
+      <div style="font-size:22px; font-weight:800; color:#B45309;" id="analyticsStockLowCount">0</div>
+    </div>
+    <div style="background:#ffffff; border-radius:10px; padding:12px 16px; border:1px solid #dde6ea; box-shadow:0 2px 6px rgba(0,0,0,0.04);">
+      <div style="font-size:10px; color:#999; text-transform:uppercase;">Out of Stock</div>
+      <div style="font-size:22px; font-weight:800; color:#CC0000;" id="analyticsStockOutCount">0</div>
+    </div>
+    <!-- Corrections summary cards -->
+    <div style="background:#ffffff; border-radius:10px; padding:12px 16px; border:1px solid #dde6ea; box-shadow:0 2px 6px rgba(0,0,0,0.04);">
+      <div style="font-size:10px; color:#999; text-transform:uppercase;">Corrections</div>
+      <div style="font-size:22px; font-weight:800; color:#B45309;" id="analyticsCorrectionsCount">0</div>
+    </div>
+    <div style="background:#ffffff; border-radius:10px; padding:12px 16px; border:1px solid #dde6ea; box-shadow:0 2px 6px rgba(0,0,0,0.04);">
+      <div style="font-size:10px; color:#999; text-transform:uppercase;">Net Adjustment</div>
+      <div style="font-size:22px; font-weight:800; color:#117594;" id="analyticsNetAdjustment">0</div>
+    </div>
+  </div>
+
+  <!-- ─── SECTION 1: Current Stock ────────────────────────── -->
+  <div style="background:#ffffff; border-radius:10px; border:1px solid #dde6ea; overflow:hidden; box-shadow:0 2px 6px rgba(0,0,0,0.04);">
+  <div onclick="toggleSection('stockCurrentSection')" style="padding:12px 16px; background:#EAF4F9; cursor:pointer; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #dde6ea; user-select:none;">
+  <span style="font-weight:700; font-size:14px; color:#0B5394;">📦 Current Stock</span>
+  <div>
+    <button onclick="event.stopPropagation(); exportAnalyticsCSV('stock_table')" style="padding:3px 12px; background:#117594; color:#fff; border:none; border-radius:4px; cursor:pointer; font-size:11px; font-weight:600; margin-right:10px;">📥 CSV</button>
+    <span id="stockCurrentToggle" style="font-size:18px;">▼</span>
+  </div>
+</div>
+    <div id="stockCurrentSection" style="display:block;">
+      <!-- 🔍 Search bar for Current Stock -->
+      <div style="padding:10px 14px; background:#f9fafb; border-bottom:1px solid #dde6ea;">
+        <input type="text" id="stockSearchInput" placeholder="🔍 Search products by name or category..." style="width:100%; padding:8px 12px; border:1px solid #C9E8F3; border-radius:6px; font-size:13px; outline:none; box-sizing:border-box;">
+      </div>
+      <div style="overflow-x:auto;">
+        <table style="width:100%; border-collapse:collapse; font-size:13px;">
+          <thead>
+            <tr style="background:#117594; color:#fff;">
+              <th style="padding:10px 14px; text-align:left;">Product</th>
+              <th style="padding:10px 14px; text-align:left;">Category</th>
+              <th style="padding:10px 14px; text-align:right;">Stock</th>
+              <th style="padding:10px 14px; text-align:right;">WAC (TZS)</th>
+              <th style="padding:10px 14px; text-align:center;">Status</th>
+            </tr>
+          </thead>
+          <tbody id="analyticsStockTableBody">
+            <tr><td colspan="6" style="padding:20px; text-align:center; color:#999;">Loading stock data...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── SECTION 2: Stock-In History ────────────────────── -->
+  <div style="background:#ffffff; border-radius:10px; border:1px solid #dde6ea; overflow:hidden; box-shadow:0 2px 6px rgba(0,0,0,0.04);">
+    <div onclick="toggleSection('stockInSection')" style="padding:12px 16px; background:#EAF4F9; cursor:pointer; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #dde6ea; user-select:none;">
+      <span style="font-weight:700; font-size:14px; color:#0B5394;">📥 Stock‑In History</span>
+      <div>
+        <button onclick="event.stopPropagation(); exportAnalyticsCSV('stock_in_history')" style="padding:3px 12px; background:#117594; color:#fff; border:none; border-radius:4px; cursor:pointer; font-size:11px; font-weight:600; margin-right:10px;">📥 CSV</button>
+        <span id="stockInToggle" style="font-size:18px;">▼</span>
+      </div>
+    </div>
+    <div id="stockInSection" style="display:block;">
+      <!-- 🔍 Search bar for Stock-In History -->
+      <div style="padding:10px 14px; background:#f9fafb; border-bottom:1px solid #dde6ea;">
+        <input type="text" id="stockInSearchInput" placeholder="🔍 Search stock-in by product name..." style="width:100%; padding:8px 12px; border:1px solid #C9E8F3; border-radius:6px; font-size:13px; outline:none; box-sizing:border-box;">
+      </div>
+      <div style="overflow-x:auto;">
+        <table style="width:100%; border-collapse:collapse; font-size:13px;">
+          <thead>
+            <tr style="background:#117594; color:#fff;">
+              <th style="padding:10px 14px; text-align:left;">Date</th>
+              <th style="padding:10px 14px; text-align:left;">Product</th>
+              <th style="padding:10px 14px; text-align:right;">Qty</th>
+              <th style="padding:10px 14px; text-align:right;">Unit Cost</th>
+              <th style="padding:10px 14px; text-align:right;">Total Cost</th>
+              <th style="padding:10px 14px; text-align:center;">Type</th>
+            </tr>
+          </thead>
+          <tbody id="stockInHistoryBody">
+            <tr><td colspan="6" style="padding:20px; text-align:center; color:#999;">No stock‑in records.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── SECTION 3: Correction History ──────────────────── -->
+  <div style="background:#ffffff; border-radius:10px; border:1px solid #dde6ea; overflow:hidden; box-shadow:0 2px 6px rgba(0,0,0,0.04);">
+    <div onclick="toggleSection('correctionSection')" style="padding:12px 16px; background:#EAF4F9; cursor:pointer; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #dde6ea; user-select:none;">
+      <span style="font-weight:700; font-size:14px; color:#0B5394;">✏️ Correction History</span>
+      <div>
+        <button onclick="event.stopPropagation(); exportAnalyticsCSV('correction_history')" style="padding:3px 12px; background:#117594; color:#fff; border:none; border-radius:4px; cursor:pointer; font-size:11px; font-weight:600; margin-right:10px;">📥 CSV</button>
+        <span id="correctionToggle" style="font-size:18px;">▼</span>
+      </div>
+    </div>
+    <div id="correctionSection" style="display:block;">
+      <!-- 🔍 Search bar for Correction History -->
+      <div style="padding:10px 14px; background:#f9fafb; border-bottom:1px solid #dde6ea;">
+        <input type="text" id="correctionSearchInput" placeholder="🔍 Search corrections by product name..." style="width:100%; padding:8px 12px; border:1px solid #C9E8F3; border-radius:6px; font-size:13px; outline:none; box-sizing:border-box;">
+      </div>
+      <div style="overflow-x:auto;">
+        <table style="width:100%; border-collapse:collapse; font-size:13px;">
+          <thead>
+            <tr style="background:#117594; color:#fff;">
+              <th style="padding:10px 14px; text-align:left;">Date</th>
+              <th style="padding:10px 14px; text-align:left;">Product</th>
+              <th style="padding:10px 14px; text-align:center;">Type</th>
+              <th style="padding:10px 14px; text-align:right;">Qty</th>
+              <th style="padding:10px 14px; text-align:right;">Net Effect</th>
+              <th style="padding:10px 14px; text-align:left;">Remarks</th>
+            </tr>
+          </thead>
+          <tbody id="analyticsCorrectionHistoryBody">
+            <tr><td colspan="6" style="padding:20px; text-align:center; color:#999;">No corrections in this period.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+  
+<!-- ─── CASH PANEL ────────────────────────────────────────── -->
+<div id="panel-cash" class="analytics-panel" style="display:none; flex-direction:column; gap:16px;">
+
+  <!-- Summary Cards -->
+  <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px;">
+    <div style="background:#ffffff; border-radius:10px; padding:12px 16px; border:1px solid #dde6ea; box-shadow:0 2px 6px rgba(0,0,0,0.04);">
+      <div style="font-size:10px; color:#999; text-transform:uppercase;">Total In</div>
+      <div style="font-size:22px; font-weight:800; color:#1E7B34;" id="analyticsCashTotalIn">TZS 0</div>
+    </div>
+    <div style="background:#ffffff; border-radius:10px; padding:12px 16px; border:1px solid #dde6ea; box-shadow:0 2px 6px rgba(0,0,0,0.04);">
+      <div style="font-size:10px; color:#999; text-transform:uppercase;">Total Out</div>
+      <div style="font-size:22px; font-weight:800; color:#CC0000;" id="analyticsCashTotalOut">TZS 0</div>
+    </div>
+    <div style="background:#ffffff; border-radius:10px; padding:12px 16px; border:1px solid #dde6ea; box-shadow:0 2px 6px rgba(0,0,0,0.04);">
+      <div style="font-size:10px; color:#999; text-transform:uppercase;">Net Balance</div>
+      <div style="font-size:22px; font-weight:800; color:#117594;" id="analyticsCashNetBalance">TZS 0</div>
+    </div>
+    <div style="background:#ffffff; border-radius:10px; padding:12px 16px; border:1px solid #dde6ea; box-shadow:0 2px 6px rgba(0,0,0,0.04);">
+      <div style="font-size:10px; color:#999; text-transform:uppercase;">Total Movements</div>
+      <div style="font-size:22px; font-weight:800; color:#0B5394;" id="analyticsCashTotalMovements">0</div>
+    </div>
+  </div>
+
+  <!-- ─── SECTION: Cash by Category (Collapsible) ────────── -->
+  <div style="background:#ffffff; border-radius:10px; border:1px solid #dde6ea; overflow:hidden; box-shadow:0 2px 6px rgba(0,0,0,0.04);">
+    <div onclick="toggleSection('cashCategorySection')" style="padding:12px 16px; background:#EAF4F9; cursor:pointer; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #dde6ea; user-select:none;">
+      <span style="font-weight:700; font-size:14px; color:#0B5394;">📊 Cash by Category</span>
+      <div>
+        <button onclick="event.stopPropagation(); exportAnalyticsCSV('cash_by_category')" style="padding:3px 12px; background:#117594; color:#fff; border:none; border-radius:4px; cursor:pointer; font-size:11px; font-weight:600; margin-right:10px;">📥 CSV</button>
+        <span id="cashCategoryToggle" style="font-size:18px;">▼</span>
+      </div>
+    </div>
+    <div id="cashCategorySection" style="display:block;">
+      <div style="overflow-x:auto;">
+        <table style="width:100%; border-collapse:collapse; font-size:13px;">
+          <thead>
+            <tr style="background:#117594; color:#fff;">
+              <th style="padding:10px 14px; text-align:left;">Category</th>
+              <th style="padding:10px 14px; text-align:right;">In</th>
+              <th style="padding:10px 14px; text-align:right;">Out</th>
+              <th style="padding:10px 14px; text-align:right;">Net</th>
+            </tr>
+          </thead>
+          <tbody id="cashCategoryBody">
+            <tr><td colspan="4" style="padding:20px; text-align:center; color:#999;">No cash movements in this period.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── SECTION: Recent Cash Movements (Collapsible) ────── -->
+  <div style="background:#ffffff; border-radius:10px; border:1px solid #dde6ea; overflow:hidden; box-shadow:0 2px 6px rgba(0,0,0,0.04);">
+    <div onclick="toggleSection('cashMovementsSection')" style="padding:12px 16px; background:#EAF4F9; cursor:pointer; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #dde6ea; user-select:none;">
+      <span style="font-weight:700; font-size:14px; color:#0B5394;">💸 Recent Cash Movements</span>
+      <div>
+        <button onclick="event.stopPropagation(); exportAnalyticsCSV('cash_movements')" style="padding:3px 12px; background:#117594; color:#fff; border:none; border-radius:4px; cursor:pointer; font-size:11px; font-weight:600; margin-right:10px;">📥 CSV</button>
+        <span id="cashMovementsToggle" style="font-size:18px;">▼</span>
+      </div>
+    </div>
+    <div id="cashMovementsSection" style="display:block;">
+      <!-- 🔍 Search bar for movements -->
+      <div style="padding:10px 14px; background:#f9fafb; border-bottom:1px solid #dde6ea;">
+        <input type="text" id="cashSearchInput" placeholder="🔍 Search by category, item, or notes..." style="width:100%; padding:8px 12px; border:1px solid #C9E8F3; border-radius:6px; font-size:13px; outline:none; box-sizing:border-box;">
+      </div>
+      <div style="overflow-x:auto;">
+        <table style="width:100%; border-collapse:collapse; font-size:13px;">
+          <thead>
+            <tr style="background:#117594; color:#fff;">
+              <th style="padding:10px 14px; text-align:left;">Date</th>
+              <th style="padding:10px 14px; text-align:left;">Category</th>
+              <th style="padding:10px 14px; text-align:left;">Item</th>
+              <th style="padding:10px 14px; text-align:right;">Amount</th>
+              <th style="padding:10px 14px; text-align:center;">Direction</th>
+              <th style="padding:10px 14px; text-align:left;">Notes</th>
+            </tr>
+          </thead>
+          <tbody id="cashMovementsBody">
+            <tr><td colspan="6" style="padding:20px; text-align:center; color:#999;">No cash movements in this period.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ─── DEBTS PANEL ────────────────────────────────────────── -->
+<div id="panel-debts" class="analytics-panel" style="display:none; flex-direction:column; gap:16px;">
+
+  <!-- Summary Cards -->
+  <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px;">
+    <div style="background:#ffffff; border-radius:10px; padding:12px 16px; border:1px solid #dde6ea; box-shadow:0 2px 6px rgba(0,0,0,0.04);">
+      <div style="font-size:10px; color:#999; text-transform:uppercase;">Total Owed</div>
+      <div style="font-size:22px; font-weight:800; color:#CC0000;" id="analyticsDebtsTotalOwed">TZS 0</div>
+    </div>
+    <div style="background:#ffffff; border-radius:10px; padding:12px 16px; border:1px solid #dde6ea; box-shadow:0 2px 6px rgba(0,0,0,0.04);">
+      <div style="font-size:10px; color:#999; text-transform:uppercase;">Active Debts</div>
+      <div style="font-size:22px; font-weight:800; color:#0B5394;" id="analyticsDebtsActiveCount">0</div>
+    </div>
+    <div style="background:#ffffff; border-radius:10px; padding:12px 16px; border:1px solid #dde6ea; box-shadow:0 2px 6px rgba(0,0,0,0.04);">
+      <div style="font-size:10px; color:#999; text-transform:uppercase;">Overdue (7+ days)</div>
+      <div style="font-size:22px; font-weight:800; color:#B45309;" id="analyticsDebtsOverdueCount">0</div>
+    </div>
+    <div style="background:#ffffff; border-radius:10px; padding:12px 16px; border:1px solid #dde6ea; box-shadow:0 2px 6px rgba(0,0,0,0.04);">
+      <div style="font-size:10px; color:#999; text-transform:uppercase;">Overdue Amount</div>
+      <div style="font-size:22px; font-weight:800; color:#CC0000;" id="analyticsDebtsOverdueAmount">TZS 0</div>
+    </div>
+  </div>
+
+  <!-- ─── Debts Table (Collapsible) ────────────────────────── -->
+  <div style="background:#ffffff; border-radius:10px; border:1px solid #dde6ea; overflow:hidden; box-shadow:0 2px 6px rgba(0,0,0,0.04);">
+    <div onclick="toggleSection('debtsTableSection')" style="padding:12px 16px; background:#EAF4F9; cursor:pointer; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #dde6ea; user-select:none;">
+      <span style="font-weight:700; font-size:14px; color:#0B5394;">📋 Outstanding Debts</span>
+      <div>
+        <button onclick="event.stopPropagation(); exportAnalyticsCSV('debts_table')" style="padding:3px 12px; background:#117594; color:#fff; border:none; border-radius:4px; cursor:pointer; font-size:11px; font-weight:600; margin-right:10px;">📥 CSV</button>
+        <span id="debtsTableToggle" style="font-size:18px;">▼</span>
+      </div>
+    </div>
+    <div id="debtsTableSection" style="display:block;">
+      <!-- 🔍 Search bar for Debts -->
+      <div style="padding:10px 14px; background:#f9fafb; border-bottom:1px solid #dde6ea;">
+        <input type="text" id="analyticsDebtsSearchInput" placeholder="🔍 Search by customer name or card..." style="width:100%; padding:8px 12px; border:1px solid #C9E8F3; border-radius:6px; font-size:13px; outline:none; box-sizing:border-box;">
+      </div>
+      <div style="overflow-x:auto;">
+        <table style="width:100%; border-collapse:collapse; font-size:13px;">
+          <thead>
+            <tr style="background:#117594; color:#fff;">
+              <th style="padding:10px 14px; text-align:left;">Customer</th>
+              <th style="padding:10px 14px; text-align:right;">Original</th>
+              <th style="padding:10px 14px; text-align:right;">Paid</th>
+              <th style="padding:10px 14px; text-align:right;">Balance</th>
+              <th style="padding:10px 14px; text-align:center;">Due Date</th>
+              <th style="padding:10px 14px; text-align:center;">Overdue</th>
+              <th style="padding:10px 14px; text-align:center;">Status</th>
+            </tr>
+          </thead>
+          <tbody id="analyticsDebtsTableBody">
+            <tr><td colspan="7" style="padding:20px; text-align:center; color:#999;">Loading debts...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ─── PRODUCTS PANEL ────────────────────────────────────────── -->
+<div id="panel-products" class="analytics-panel" style="display:none; flex-direction:column; gap:16px;">
+
+  <!-- Summary Cards -->
+  <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px;">
+    <div style="background:#ffffff; border-radius:10px; padding:12px 16px; border:1px solid #dde6ea; box-shadow:0 2px 6px rgba(0,0,0,0.04);">
+      <div style="font-size:10px; color:#999; text-transform:uppercase;">Total Products</div>
+      <div style="font-size:22px; font-weight:800; color:#0B5394;" id="analyticsProductsTotalProducts">0</div>
+    </div>
+    <div style="background:#ffffff; border-radius:10px; padding:12px 16px; border:1px solid #dde6ea; box-shadow:0 2px 6px rgba(0,0,0,0.04);">
+      <div style="font-size:10px; color:#999; text-transform:uppercase;">Total Units Sold</div>
+      <div style="font-size:22px; font-weight:800; color:#117594;" id="analyticsProductsTotalUnits">0</div>
+    </div>
+    <div style="background:#ffffff; border-radius:10px; padding:12px 16px; border:1px solid #dde6ea; box-shadow:0 2px 6px rgba(0,0,0,0.04);">
+      <div style="font-size:10px; color:#999; text-transform:uppercase;">Total Revenue</div>
+      <div style="font-size:22px; font-weight:800; color:#1E7B34;" id="analyticsProductsTotalRevenue">TZS 0</div>
+    </div>
+    <div style="background:#ffffff; border-radius:10px; padding:12px 16px; border:1px solid #dde6ea; box-shadow:0 2px 6px rgba(0,0,0,0.04);">
+      <div style="font-size:10px; color:#999; text-transform:uppercase;">Fast Moving Items</div>
+      <div style="font-size:22px; font-weight:800; color:#1E7B34;" id="analyticsProductsFastCount">0</div>
+    </div>
+    <div style="background:#ffffff; border-radius:10px; padding:12px 16px; border:1px solid #dde6ea; box-shadow:0 2px 6px rgba(0,0,0,0.04);">
+      <div style="font-size:10px; color:#999; text-transform:uppercase;">Dead Stock Items</div>
+      <div style="font-size:22px; font-weight:800; color:#CC0000;" id="analyticsProductsDeadCount">0</div>
+    </div>
+  </div>
+
+  <!-- ─── SECTION: Product Performance Table (Collapsible) ──── -->
+  <div style="background:#ffffff; border-radius:10px; border:1px solid #dde6ea; overflow:hidden; box-shadow:0 2px 6px rgba(0,0,0,0.04);">
+    <div onclick="toggleSection('productsTopSection')" style="padding:12px 16px; background:#EAF4F9; cursor:pointer; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #dde6ea; user-select:none;">
+      <span style="font-weight:700; font-size:14px; color:#0B5394;">📊 Product Performance</span>
+      <div>
+        <button onclick="event.stopPropagation(); exportAnalyticsCSV('products_performance')" style="padding:3px 12px; background:#117594; color:#fff; border:none; border-radius:4px; cursor:pointer; font-size:11px; font-weight:600; margin-right:10px;">📥 CSV</button>
+        <span id="productsTopToggle" style="font-size:18px;">▼</span>
+      </div>
+    </div>
+    <div id="productsTopSection" style="display:block;">
+      <!-- 🔍 Search bar -->
+      <div style="padding:10px 14px; background:#f9fafb; border-bottom:1px solid #dde6ea;">
+        <input type="text" id="analyticsProductsSearchInput" placeholder="🔍 Search by product name or category..." style="width:100%; padding:8px 12px; border:1px solid #C9E8F3; border-radius:6px; font-size:13px; outline:none; box-sizing:border-box;">
+      </div>
+      <div style="overflow-x:auto;">
+        <table style="width:100%; border-collapse:collapse; font-size:12px;">
+          <thead>
+            <tr style="background:#117594; color:#fff;">
+              <th style="padding:8px 10px; text-align:left; white-space:nowrap;">📅 Period</th>
+              <th style="padding:8px 10px; text-align:left; white-space:nowrap;">Product</th>
+              <th style="padding:8px 10px; text-align:left; white-space:nowrap;">Category</th>
+              <th style="padding:8px 10px; text-align:right; white-space:nowrap;">📦 Stock</th>
+              <th style="padding:8px 10px; text-align:right; white-space:nowrap;">🛒 Sold</th>
+              <th style="padding:8px 10px; text-align:right; white-space:nowrap;">💰 WAC</th>
+              <th style="padding:8px 10px; text-align:right; white-space:nowrap;">🏷️ Price</th>
+              <th style="padding:8px 10px; text-align:right; white-space:nowrap;">💵 Unit Profit</th>
+              <th style="padding:8px 10px; text-align:right; white-space:nowrap;">📈 Total Profit</th>
+              <th style="padding:8px 10px; text-align:right; white-space:nowrap;">📊 Margin</th>
+              <th style="padding:8px 10px; text-align:center; white-space:nowrap;">Movement</th>
+              <th style="padding:8px 10px; text-align:center; white-space:nowrap;">Proposal</th>
+            </tr>
+          </thead>
+          <tbody id="analyticsProductsTopBody">
+            <tr><td colspan="12" style="padding:20px; text-align:center; color:#999;">Loading product data...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── CUSTOMER ANALYTICS PANEL ──────────────────────────── -->
+<div id="panel-customer-analytics" class="analytics-panel" style="display:none; flex-direction:column; gap:16px;">
+
+  <!-- Summary Cards -->
+  <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px;">
+    <div style="background:#ffffff; border-radius:10px; padding:12px 16px; border:1px solid #dde6ea; box-shadow:0 2px 6px rgba(0,0,0,0.04);">
+      <div style="font-size:10px; color:#999; text-transform:uppercase;">Total Customers</div>
+      <div style="font-size:22px; font-weight:800; color:#0B5394;" id="analyticsCustomersTotal">0</div>
+    </div>
+    <div style="background:#ffffff; border-radius:10px; padding:12px 16px; border:1px solid #dde6ea; box-shadow:0 2px 6px rgba(0,0,0,0.04);">
+      <div style="font-size:10px; color:#999; text-transform:uppercase;">Active</div>
+      <div style="font-size:22px; font-weight:800; color:#1E7B34;" id="analyticsCustomersActive">0</div>
+    </div>
+    <div style="background:#ffffff; border-radius:10px; padding:12px 16px; border:1px solid #dde6ea; box-shadow:0 2px 6px rgba(0,0,0,0.04);">
+      <div style="font-size:10px; color:#999; text-transform:uppercase;">New (This Period)</div>
+      <div style="font-size:22px; font-weight:800; color:#117594;" id="analyticsCustomersNew">0</div>
+    </div>
+    <div style="background:#ffffff; border-radius:10px; padding:12px 16px; border:1px solid #dde6ea; box-shadow:0 2px 6px rgba(0,0,0,0.04);">
+      <div style="font-size:10px; color:#999; text-transform:uppercase;">With Debt</div>
+      <div style="font-size:22px; font-weight:800; color:#CC0000;" id="analyticsCustomersWithDebt">0</div>
+    </div>
+    <div style="background:#ffffff; border-radius:10px; padding:12px 16px; border:1px solid #dde6ea; box-shadow:0 2px 6px rgba(0,0,0,0.04);">
+      <div style="font-size:10px; color:#999; text-transform:uppercase;">Total Debt</div>
+      <div style="font-size:22px; font-weight:800; color:#CC0000;" id="analyticsCustomersTotalDebt">TZS 0</div>
+    </div>
+    <div style="background:#ffffff; border-radius:10px; padding:12px 16px; border:1px solid #dde6ea; box-shadow:0 2px 6px rgba(0,0,0,0.04);">
+      <div style="font-size:10px; color:#999; text-transform:uppercase;">Total Points</div>
+      <div style="font-size:22px; font-weight:800; color:#B45309;" id="analyticsCustomersTotalPoints">0</div>
+    </div>
+  </div>
+
+  <!-- Customer Table -->
+  <div style="background:#ffffff; border-radius:10px; border:1px solid #dde6ea; overflow:hidden; box-shadow:0 2px 6px rgba(0,0,0,0.04);">
+    <div style="padding:10px 16px; background:#EAF4F9; border-bottom:1px solid #dde6ea; font-weight:700; font-size:14px; color:#0B5394; display:flex; justify-content:space-between; align-items:center;">
+      <span>👥 Customer List</span>
+      <button onclick="exportAnalyticsCSV('customers_list')" style="padding:3px 12px; background:#117594; color:#fff; border:none; border-radius:4px; cursor:pointer; font-size:11px; font-weight:600;">📥 CSV</button>
+    </div>
+    <div style="overflow-x:auto;">
+      <table style="width:100%; border-collapse:collapse; font-size:13px;">
+        <thead>
+          <tr style="background:#117594; color:#fff;">
+            <th style="padding:10px 14px; text-align:left;">Card</th>
+            <th style="padding:10px 14px; text-align:left;">Name</th>
+            <th style="padding:10px 14px; text-align:left;">Phone</th>
+            <th style="padding:10px 14px; text-align:right;">Points</th>
+            <th style="padding:10px 14px; text-align:right;">Debt</th>
+            <th style="padding:10px 14px; text-align:center;">Status</th>
+            <th style="padding:10px 14px; text-align:center;">Last Visit</th>
+          </tr>
+        </thead>
+        <tbody id="analyticsCustomersTableBody">
+          <tr><td colspan="7" style="padding:20px; text-align:center; color:#999;">Loading customers...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+</div>  <!-- ✅ ADD THIS — closes reportsView -->
+
+
+         <!-- ============================================================
+           SETTINGS VIEW
+           ============================================================ -->
+      <div id="settingsView" style="display:none; flex-direction:column; height:100%; width:100%; padding:16px; overflow-y:auto; gap:16px; box-sizing:border-box;">
+
+        <!-- Title + Back -->
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-shrink:0;">
+          <h2 style="color:#0B5394; margin:0; font-size:20px; font-family: 'Century Gothic', 'Trebuchet MS', Arial, sans-serif;">⚙️ System Settings</h2>
+          <button onclick="showPage('pos')" style="background:#117594; color:#fff; border:none; padding:8px 18px; border-radius:6px; cursor:pointer; font-weight:600; font-size:13px; font-family: 'Century Gothic', 'Trebuchet MS', Arial, sans-serif; box-shadow:0 4px 0 #0D5A70; display:flex; align-items:center; gap:6px;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 0 #0D5A70';" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 0 #0D5A70';" onmousedown="this.style.transform='translateY(2px)';this.style.boxShadow='0 2px 0 #0D5A70';" onmouseup="this.style.transform='translateY(-1px)';this.style.boxShadow='0 5px 0 #0D5A70';">
+            <span style="font-size:16px;">←</span> Back to POS
+          </button>
+        </div>
+
+        <!-- Settings Content -->
+        <div id="settingsContent" style="display:flex; gap:20px; flex:1; min-height:0;">
+
+          <!-- LEFT: Store Settings Form -->
+          <div style="flex:1; background:#fff; border-radius:8px; border:1px solid #DDE6EA; padding:20px; overflow-y:auto;">
+            <h3 style="font-size:14px; color:#0B5394; margin-bottom:16px; font-family: 'Century Gothic', 'Trebuchet MS', Arial, sans-serif;">🏪 Store & System Configuration</h3>
+
+            <div style="margin-bottom:14px;">
+              <label style="font-size:12px; color:#595959; font-weight:600; display:block; margin-bottom:4px;">Store Name</label>
+              <input type="text" id="settingsStoreName" placeholder="e.g. KazMart Supermarket" style="width:100%; padding:8px 12px; border:1.5px solid #C9E8F3; border-radius:6px; font-size:13px; font-family:inherit; box-sizing:border-box;" />
+            </div>
+
+            <div style="margin-bottom:14px;">
+              <label style="font-size:12px; color:#595959; font-weight:600; display:block; margin-bottom:4px;">Store Address</label>
+              <input type="text" id="settingsStoreAddress" placeholder="e.g. Dar es Salaam, Tanzania" style="width:100%; padding:8px 12px; border:1.5px solid #C9E8F3; border-radius:6px; font-size:13px; font-family:inherit; box-sizing:border-box;" />
+            </div>
+
+            <div style="margin-bottom:14px;">
+              <label style="font-size:12px; color:#595959; font-weight:600; display:block; margin-bottom:4px;">Store Phone</label>
+              <input type="text" id="settingsStorePhone" placeholder="e.g. +255 712 345 678" style="width:100%; padding:8px 12px; border:1.5px solid #C9E8F3; border-radius:6px; font-size:13px; font-family:inherit; box-sizing:border-box;" />
+            </div>
+
+            <div style="margin-bottom:14px;">
+              <label style="font-size:12px; color:#595959; font-weight:600; display:block; margin-bottom:4px;">Tax Rate (VAT) %</label>
+              <input type="number" id="settingsTaxRate" placeholder="e.g. 18" style="width:100%; padding:8px 12px; border:1.5px solid #C9E8F3; border-radius:6px; font-size:13px; font-family:inherit; box-sizing:border-box;" />
+            </div>
+
+            <div style="margin-bottom:14px;">
+              <label style="font-size:12px; color:#595959; font-weight:600; display:block; margin-bottom:4px;">Currency Symbol</label>
+              <input type="text" id="settingsCurrency" placeholder="e.g. TZS" style="width:100%; padding:8px 12px; border:1.5px solid #C9E8F3; border-radius:6px; font-size:13px; font-family:inherit; box-sizing:border-box;" />
+            </div>
+
+            <div style="margin-bottom:20px;">
+              <label style="font-size:12px; color:#595959; font-weight:600; display:block; margin-bottom:4px;">Low Stock Alert Threshold</label>
+              <input type="number" id="settingsLowStock" placeholder="e.g. 5" style="width:100%; padding:8px 12px; border:1.5px solid #C9E8F3; border-radius:6px; font-size:13px; font-family:inherit; box-sizing:border-box;" />
+            </div>
+
+            <button id="settingsSaveBtn" style="padding:10px 24px; background:#117594; color:#fff; border:none; border-radius:6px; cursor:pointer; font-weight:600; font-size:13px; font-family: 'Century Gothic', 'Trebuchet MS', Arial, sans-serif; box-shadow:0 3px 0 #0D5A70; transition:all 0.12s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 5px 0 #0D5A70';" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 3px 0 #0D5A70';" onmousedown="this.style.transform='translateY(2px)';this.style.boxShadow='0 1px 0 #0D5A70';" onmouseup="this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 0 #0D5A70';">
+              💾 Save Settings
+            </button>
+
+            <div id="settingsMessage" style="margin-top:12px; font-size:13px; font-weight:600;"></div>
+          </div>
+
+          <!-- RIGHT: User Management -->
+          <div style="flex:1; background:#fff; border-radius:8px; border:1px solid #DDE6EA; overflow:hidden; display:flex; flex-direction:column; min-height:0;">
+            <div style="padding:10px 14px; background:#EAF4F9; border-bottom:1px solid #DDE6EA; font-weight:700; font-size:13px; color:#0B5394; flex-shrink:0;">👥 System Users</div>
+            <div style="overflow:auto; flex:1; padding:12px;">
+              <table style="width:100%; border-collapse:collapse; font-size:12px; font-family: 'Century Gothic', 'Trebuchet MS', Arial, sans-serif;">
+                <thead>
+                  <tr style="background:#117594; color:#fff;">
+                    <th style="padding:8px 12px; text-align:left;">Name</th>
+                    <th style="padding:8px 12px; text-align:left;">Username</th>
+                    <th style="padding:8px 12px; text-align:center;">Role</th>
+                  </tr>
+                </thead>
+                <tbody id="settingsUserTableBody">
+                  <tr><td colspan="3" style="padding:20px; text-align:center; color:#999;">Loading users...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      <!-- END settingsView -->   
+
+
+      <!-- ─── CUSTOMER MANAGEMENT VIEW ──────────────────────────── -->
+<div id="customerView" style="display:none; flex-direction:column; height:100%; width:100%; padding:16px; overflow-y:auto; gap:16px; box-sizing:border-box; background:#f4f8fa;">
+
+  <!-- Header -->
+  <div style="display:flex; justify-content:space-between; align-items:center; flex-shrink:0; flex-wrap:wrap; gap:8px; background:#ffffff; padding:12px 20px; border-radius:10px; border:1px solid #dde6ea; box-shadow:0 2px 6px rgba(0,0,0,0.06);">
+    <div style="display:flex; align-items:center; gap:12px;">
+      <h2 style="color:#0B5394; margin:0; font-size:24px; font-weight:800; font-family: 'Century Gothic', 'Trebuchet MS', Arial, sans-serif;">👥 Customer Management</h2>
+      <span id="customerLastUpdated" style="font-size:11px; color:#999; font-weight:400;">Updated: just now</span>
+    </div>
+    <button onclick="showPage('pos')" style="background:#117594; color:#ffffff; border:none; padding:8px 18px; border-radius:6px; cursor:pointer; font-weight:600; font-size:13px; font-family: 'Century Gothic', 'Trebuchet MS', Arial, sans-serif; box-shadow:0 4px 0 #0D5A70; transition:all 0.12s; display:flex; align-items:center; gap:6px;">
+      <span style="font-size:16px;">←</span> Back to POS
+    </button>
+  </div>
+
+  <!-- Filter Bar -->
+  <div style="display:flex; flex-wrap:wrap; gap:10px; align-items:center; background:#ffffff; padding:12px 16px; border-radius:10px; border:1px solid #dde6ea; box-shadow:0 2px 6px rgba(0,0,0,0.06);">
+    <input type="text" id="customerSearchInput" placeholder="🔍 Search by name, card, or phone..." style="flex:1; min-width:200px; padding:8px 12px; border:1px solid #C9E8F3; border-radius:6px; font-size:13px; outline:none; box-sizing:border-box;">
+    <select id="customerStatusFilter" style="padding:8px 12px; border:1px solid #C9E8F3; border-radius:6px; font-size:13px; background:#fff; color:#0B5394;">
+      <option value="all">All Status</option>
+      <option value="Active">Active</option>
+      <option value="Inactive">Inactive</option>
+      <option value="Blacklisted">Blacklisted</option>
+    </select>
+    <button id="customerRefreshBtn" onclick="loadCustomers()" style="padding:8px 16px; background:#117594; color:#fff; border:none; border-radius:6px; cursor:pointer; font-weight:600; font-size:12px;">⟳ Refresh</button>
+    <button id="customerAddBtn" onclick="openAddCustomerModal()" style="padding:8px 16px; background:#1E7B34; color:#fff; border:none; border-radius:6px; cursor:pointer; font-weight:600; font-size:12px;">➕ Add Customer</button>
+  </div>
+
+  <!-- Customer Cards Grid -->
+  <div id="customerGrid" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:14px;">
+    <div style="grid-column:1/-1; text-align:center; padding:40px; color:#999;">Loading customers...</div>
+  </div>
+</div>
+
+            
+  <!-- MODAL CONTAINER -->
+
+  <!-- Edit Correction Item Modal -->
+<div id="editCorrectionModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.45); align-items:center; justify-content:center; z-index:1000;">
+  <div style="background:#fff; border-radius:10px; padding:24px; width:400px; max-width:95vw; box-shadow:0 8px 40px rgba(0,0,0,0.2);">
+    <div style="font-size:16px; font-weight:700; color:#0B5394; margin-bottom:16px;">✏️ Edit Correction Item</div>
+    
+    <div style="margin-bottom:12px;">
+      <label style="font-size:12px; color:#595959; font-weight:600; display:block; margin-bottom:4px;">Product</label>
+      <input type="text" id="editCorrProduct" disabled style="width:100%; padding:8px 12px; border:1.5px solid #C9E8F3; border-radius:6px; background:#f5f5f5; color:#333; font-size:13px; box-sizing:border-box;">
+    </div>
+    
+    <div style="margin-bottom:12px;">
+      <label style="font-size:12px; color:#595959; font-weight:600; display:block; margin-bottom:4px;">Quantity</label>
+      <input type="number" id="editCorrQty" value="1" style="width:100%; padding:8px 12px; border:1.5px solid #C9E8F3; border-radius:6px; font-size:13px; box-sizing:border-box;">
+    </div>
+
+    <!-- 👇 ADD THIS MISSING CURRENT STOCK FIELD -->
+    <div style="margin-bottom:12px;">
+      <label style="font-size:12px; color:#595959; font-weight:600; display:block; margin-bottom:4px;">Current Stock</label>
+      <input type="text" id="editCorrCurrentStock" disabled style="width:100%; padding:8px 12px; border:1.5px solid #C9E8F3; border-radius:6px; background:#f5f5f5; color:#999; font-size:13px; box-sizing:border-box;">
+    </div>
+    
+    <div style="margin-bottom:16px;">
+      <label style="font-size:12px; color:#595959; font-weight:600; display:block; margin-bottom:4px;">Correction Type</label>
+      <select id="editCorrType" style="width:100%; padding:8px 12px; border:1.5px solid #C9E8F3; border-radius:6px; font-size:13px; box-sizing:border-box;">
+        <option value="Audit">Audit — set exact stock</option>
+        <option value="Addition">Addition — add units</option>
+        <option value="Damaged">Damaged</option>
+        <option value="Expiry">Expiry</option>
+        <option value="Lost">Lost</option>
+        <option value="Used by Shop">Used by Shop</option>
+        <option value="Offered">Offered</option>
+      </select>
+    </div>
+
+    <!-- 👇 ADD THIS PREVIEW DIV -->
+    <div id="editCorrPreview" style="display:none; background:#EAF4F9; border-radius:7px; padding:10px 14px; margin-bottom:12px; font-size:13px; border:1px solid #C9E8F3;">
+      📊 Result: <strong id="editCorrResult" style="color:#117594;">—</strong>
+    </div>
+    
+    <div style="display:flex; gap:8px; justify-content:flex-end;">
+      <button id="editCorrCancel" style="padding:8px 16px; background:#e0e0e0; color:#595959; border:none; border-radius:6px; cursor:pointer; font-weight:600;">Cancel</button>
+      <button id="editCorrSave" style="padding:8px 20px; background:#117594; color:#fff; border:none; border-radius:6px; cursor:pointer; font-weight:600; box-shadow:0 3px 0 #0D5A70;">Save Changes</button>
+    </div>
+  </div>
+</div>
+  </div>
+
+      <!-- Edit Purchase Item Modal -->
+    <div id="editPurchaseModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.45); align-items:center; justify-content:center; z-index:1000;">
+      <div style="background:#fff; border-radius:10px; padding:24px; width:400px; max-width:95vw; box-shadow:0 8px 40px rgba(0,0,0,0.2);">
+        <div style="font-size:16px; font-weight:700; color:#0B5394; margin-bottom:16px; font-family:'Century Gothic','Trebuchet MS',Arial,sans-serif;">✏️ Edit Purchase Item</div>
+        <div style="margin-bottom:12px;">
+          <label style="font-size:12px; color:#595959; font-weight:600; display:block; margin-bottom:4px; font-family:'Century Gothic','Trebuchet MS',Arial,sans-serif;">Product</label>
+          <input type="text" id="editPurchaseProduct" disabled style="width:100%; padding:8px 12px; border:1.5px solid #C9E8F3; border-radius:6px; font-family:'Century Gothic','Trebuchet MS',Arial,sans-serif; background:#f5f5f5; color:#333; font-size:13px; box-sizing:border-box;">
+        </div>
+        <div style="margin-bottom:12px;">
+          <label style="font-size:12px; color:#595959; font-weight:600; display:block; margin-bottom:4px; font-family:'Century Gothic','Trebuchet MS',Arial,sans-serif;">Quantity</label>
+          <input type="number" id="editPurchaseQty" value="1" style="width:100%; padding:8px 12px; border:1.5px solid #C9E8F3; border-radius:6px; font-family:'Century Gothic','Trebuchet MS',Arial,sans-serif; font-size:13px; box-sizing:border-box;">
+        </div>
+        <div style="margin-bottom:12px;">
+          <label style="font-size:12px; color:#595959; font-weight:600; display:block; margin-bottom:4px; font-family:'Century Gothic','Trebuchet MS',Arial,sans-serif;">Supplier</label>
+          <input type="text" id="editPurchaseSupplier" style="width:100%; padding:8px 12px; border:1.5px solid #C9E8F3; border-radius:6px; font-family:'Century Gothic','Trebuchet MS',Arial,sans-serif; font-size:13px; box-sizing:border-box;">
+        </div>
+        <div style="margin-bottom:16px; padding:8px 12px; background:#EAF4F9; border-radius:6px;">
+          <div style="display:flex; justify-content:space-between; font-size:13px; font-family:'Century Gothic','Trebuchet MS',Arial,sans-serif;">
+            <span>Unit Price:</span>
+            <strong id="editPurchaseUnitPrice" style="color:#117594;">TZS 0</strong>
+          </div>
+          <div style="display:flex; justify-content:space-between; font-size:13px; font-family:'Century Gothic','Trebuchet MS',Arial,sans-serif; margin-top:2px;">
+            <span>Total:</span>
+            <strong id="editPurchaseTotal" style="color:#117594;">TZS 0</strong>
+          </div>
+        </div>
+        <div style="display:flex; gap:8px; justify-content:flex-end;">
+          <button id="editPurchaseCancel" style="padding:8px 16px; background:#e0e0e0; color:#595959; border:none; border-radius:6px; cursor:pointer; font-family:'Century Gothic','Trebuchet MS',Arial,sans-serif; font-weight:600;">Cancel</button>
+          <button id="editPurchaseSave" style="padding:8px 20px; background:#117594; color:#fff; border:none; border-radius:6px; cursor:pointer; font-family:'Century Gothic','Trebuchet MS',Arial,sans-serif; font-weight:600; box-shadow:0 3px 0 #0D5A70;">Save Changes</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Payment Modal -->
+    <div id="paymentModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.45); align-items:center; justify-content:center; z-index:1000;">
+      <div style="background:#fff; border-radius:10px; padding:24px; width:400px; max-width:95vw; box-shadow:0 8px 40px rgba(0,0,0,0.2);">
+        <div style="font-size:16px; font-weight:700; color:#0B5394; margin-bottom:16px; font-family:'Century Gothic','Trebuchet MS',Arial,sans-serif;">💰 Record Payment</div>
+        <div id="paymentModalInfo" style="background:#EAF4F9; border-radius:6px; padding:12px; margin-bottom:16px; font-size:13px;">
+          <div style="display:flex; justify-content:space-between;"><span>Customer</span><strong id="payCustName">—</strong></div>
+          <div style="display:flex; justify-content:space-between; margin-top:4px;"><span>Balance</span><strong id="payBalance" style="color:#CC0000;">TZS 0</strong></div>
+        </div>
+        <div style="margin-bottom:16px;">
+          <label style="font-size:12px; color:#595959; font-weight:600; display:block; margin-bottom:4px; font-family:'Century Gothic','Trebuchet MS',Arial,sans-serif;">Amount Paying (TZS)</label>
+          <input type="number" id="payAmountInput" placeholder="Enter amount..." style="width:100%; padding:8px 12px; border:1.5px solid #C9E8F3; border-radius:6px; font-family:'Century Gothic','Trebuchet MS',Arial,sans-serif; font-size:14px; box-sizing:border-box;" />
+        </div>
+        <div style="display:flex; gap:8px; justify-content:flex-end;">
+          <button id="payCancelBtn" style="padding:8px 16px; background:#e0e0e0; color:#595959; border:none; border-radius:6px; cursor:pointer; font-family:'Century Gothic','Trebuchet MS',Arial,sans-serif; font-weight:600;">Cancel</button>
+          <button id="payConfirmBtn" style="padding:8px 20px; background:#117594; color:#fff; border:none; border-radius:6px; cursor:pointer; font-family:'Century Gothic','Trebuchet MS',Arial,sans-serif; font-weight:600; box-shadow:0 3px 0 #0D5A70;">Confirm Payment</button>
+        </div>
+      </div>
+    </div>
+
+        <!-- SHIFT SUMMARY MODAL -->
+    <div id="shiftModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.45); backdrop-filter:blur(6px); align-items:center; justify-content:center; z-index:1000;">
+      <div style="background:#fff; border-radius:10px; padding:24px; width:500px; max-width:95vw; max-height:90vh; overflow-y:auto; box-shadow:0 8px 40px rgba(0,0,0,0.2);">
+        <div style="font-size:18px; font-weight:700; color:#0B5394; margin-bottom:12px;">📊 Shift Summary</div>
+        <div style="background:#EAF4F9; border-radius:6px; padding:14px; margin-bottom:16px; font-size:13px; line-height:1.8;">
+          <div style="display:flex; justify-content:space-between;"><span>Shift Started</span><strong id="shiftStartTime">—</strong></div>
+          <div style="display:flex; justify-content:space-between;"><span>Opening Cash</span><strong id="shiftOpeningCash">—</strong></div>
+          <div style="display:flex; justify-content:space-between;"><span>Total Sales</span><strong id="shiftTotalSales">—</strong></div>
+          <div style="display:flex; justify-content:space-between;"><span>Total Cash In</span><strong id="shiftCashIn">—</strong></div>
+          <div style="display:flex; justify-content:space-between;"><span>Total Cash Out</span><strong id="shiftCashOut">—</strong></div>
+          <div style="display:flex; justify-content:space-between;"><span>Net Cash Flow</span><strong id="shiftNetCash">—</strong></div>
+          <div style="display:flex; justify-content:space-between; font-weight:700; color:#0B5394; border-top:2px solid #C9E8F3; padding-top:8px; margin-top:4px;"><span>Expected Cash</span><strong id="shiftExpectedCash">—</strong></div>
+        </div>
+
+        <div id="closingCashRow" style="margin-bottom:16px;">
+  <label style="font-size:12px; color:#595959; font-weight:600; display:block; margin-bottom:4px;">Closing Cash (physical count)</label>
+  <input type="number" id="shiftClosingCash" placeholder="Enter cash in drawer..." style="width:100%; padding:8px 12px; border:1.5px solid #C9E8F3; border-radius:6px; font-size:14px; box-sizing:border-box;" />
+</div>
+
+<!-- 👇 NEW FIELDS 👇 -->
+<div id="faidaLipaRow" style="margin-bottom:12px;">
+  <label style="font-size:12px; color:#595959; font-weight:600; display:block; margin-bottom:4px;">Faida : Lipa & Wakala</label>
+  <input type="number" id="shiftFaidaLipa" step="0.01" placeholder="Enter amount..." style="width:100%; padding:8px 12px; border:1.5px solid #C9E8F3; border-radius:6px; font-size:14px; box-sizing:border-box;" />
+</div>
+
+<div id="faidaSimuRow" style="margin-bottom:12px;">
+  <label style="font-size:12px; color:#595959; font-weight:600; display:block; margin-bottom:4px;">Faida : Simu/Chaji</label>
+  <input type="number" id="shiftFaidaSimu" step="0.01" placeholder="Enter amount..." style="width:100%; padding:8px 12px; border:1.5px solid #C9E8F3; border-radius:6px; font-size:14px; box-sizing:border-box;" />
+</div>
+
+<div id="faidaGesiRow" style="margin-bottom:16px;">
+  <label style="font-size:12px; color:#595959; font-weight:600; display:block; margin-bottom:4px;">Faida : Gesi</label>
+  <input type="number" id="shiftFaidaGesi" step="0.01" placeholder="Enter amount..." style="width:100%; padding:8px 12px; border:1.5px solid #C9E8F3; border-radius:6px; font-size:14px; box-sizing:border-box;" />
+</div>
+
+        <div style="display:flex; gap:8px; justify-content:flex-end;">
+          <button id="shiftCancelBtn" style="padding:8px 16px; background:#e0e0e0; color:#595959; border:none; border-radius:6px; cursor:pointer; font-weight:600;">Cancel</button>
+          <button id="shiftConfirmBtn" style="padding:8px 20px; background:#117594; color:#fff; border:none; border-radius:6px; cursor:pointer; font-weight:600; box-shadow:0 3px 0 #0D5A70;">End Shift</button>
+        </div>
+      </div>
+    </div>
+
+<!-- Loading Overlay -->
+<div id="loadingOverlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); backdrop-filter:blur(6px); z-index:9999; align-items:center; justify-content:center; flex-direction:column;">
+  <div style="background:#fff; border-radius:12px; padding:30px 40px; text-align:center; box-shadow:0 10px 40px rgba(0,0,0,0.3); max-width:90%;">
+    <div class="spinner" style="border:6px solid #f3f3f3; border-top:6px solid #117594; border-radius:50%; width:60px; height:60px; animation: spin 1s linear infinite; margin:0 auto 16px;"></div>
+    <div id="loadingOverlayTitle" style="font-size:18px; font-weight:700; color:#0B5394;">Processing...</div>
+    <div id="loadingOverlaySubtext" style="font-size:14px; color:#595959; margin-top:4px;">Please wait...</div>
+  </div>
+</div>
+
+<!-- Logout Options Modal -->
+<div id="logoutOptionsModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); backdrop-filter:blur(6px); align-items:center; justify-content:center; z-index:999;">
+  <div style="background:#fff; border-radius:12px; padding:24px 30px; max-width:400px; width:90%; box-shadow:0 10px 40px rgba(0,0,0,0.25); text-align:center;">
+    <div style="font-size:20px; font-weight:700; color:#0B5394; margin-bottom:8px;">🚪 Log Out</div>
+    <div style="font-size:13px; color:#595959; margin-bottom:20px;">Choose an option:</div>
+    <div style="display:flex; gap:10px; flex-direction:column;">
+      <button id="logoutOptionLogout" style="padding:12px; background:rgba(143, 4, 4, 0.5); color:#fff; border:none; border-radius:8px; font-family:var(--font); font-size:15px; font-weight:600; cursor:pointer; box-shadow:0 3px 0 #3f4854; transition:all 0.1s;">
+        <span style="font-size:18px; margin-right:8px;">👤</span> Log Out
+      </button>
+      <button id="logoutOptionEndShift" style="padding:12px; background:#117594; color:#fff; border:none; border-radius:8px; font-family:var(--font); font-size:15px; font-weight:600; cursor:pointer; box-shadow:0 3px 0 #0D5A70; transition:all 0.1s;">
+        <span style="font-size:18px; margin-right:8px;">📊</span> End Shift
+      </button>
+      <button id="logoutOptionCancel" style="padding:10px; background:#e0e0e0; color:#595959; border:none; border-radius:8px; font-family:var(--font); font-size:13px; font-weight:600; cursor:pointer; margin-top:4px;">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<style>
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+</style>
+    
+       <!-- ============================================================
+         RECEIPT MODAL
+         ============================================================ -->
+    <div id="receiptModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; z-index:1000;">
+      <div style="background:#fff; border-radius:10px; padding:24px; width:420px; max-width:95vw; max-height:90vh; overflow-y:auto; box-shadow:0 8px 40px rgba(0,0,0,0.2);">
+        
+        <!-- Receipt Content -->
+        <div id="receiptContent" style="font-family:'Courier New',monospace; font-size:12px; color:#000; background:#fff; padding:16px; border-radius:4px;"></div>
+        
+        <!-- Buttons -->
+        <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:16px; border-top:1px solid #eee; padding-top:14px;">
+          <button id="receiptCloseBtn" style="padding:8px 20px; background:#e0e0e0; color:#595959; border:none; border-radius:6px; cursor:pointer; font-weight:600; font-size:13px; font-family: 'Century Gothic', 'Trebuchet MS', Arial, sans-serif;">
+            Close
+          </button>
+          <button id="receiptPrintBtn" onclick="window.print()" style="padding:8px 20px; background:#117594; color:#fff; border:none; border-radius:6px; cursor:pointer; font-weight:600; font-size:13px; font-family: 'Century Gothic', 'Trebuchet MS', Arial, sans-serif; box-shadow:0 3px 0 #0D5A70;">
+            🖨️ Print
+          </button>
+        </div>
+        
+      </div>
+    </div> 
+
+<!-- ============================================================
+     RECEIPT PRINT TEMPLATE
+     ============================================================ -->
+<div id="receiptContainer" style="display:none; background:#fff; padding:16px 20px; font-family: 'Courier New', monospace; max-width:320px; margin:auto; color:#000; border-radius:4px;">
+  
+  <!-- Header with Toggle -->
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:2px solid #EAF4F9; padding-bottom:10px;">
+  <div style="display:flex; align-items:center; gap:12px;">
+    <span style="font-size:18px; font-weight:700; color:#ff0d0d;">🛒 Quick Add</span>
+    <!-- Toggle Switch -->
+    <label style="display:flex; align-items:center; gap:6px; font-size:11px; color:#595959; cursor:pointer;">
+      <span id="modalModeLabel" style="font-weight:600; color:#117594;">Simple</span>
+      <div style="position:relative; width:40px; height:22px; background:#ccc; border-radius:11px; transition:background 0.3s; cursor:pointer;" id="modalToggleTrack">
+        <div style="position:absolute; top:2px; left:2px; width:18px; height:18px; background:#fff; border-radius:50%; transition:transform 0.3s; box-shadow:0 1px 3px rgba(0,0,0,0.2);" id="modalToggleKnob"></div>
+      </div>
+      <span id="modalModeLabel2" style="font-weight:600; color:#999;">Advanced</span>
+    </label>
+  </div>
+</div>
+  
+  <!-- Items -->
+  <div id="receiptItems" style="margin:6px 0; font-size:12px;"></div>
+  
+  <!-- Total -->
+  <div style="border-top:1px dashed #ccc; padding-top:4px; text-align:right; font-size:14px; font-weight:bold;">
+    Total: <span id="receiptTotal" style="color:#117594;">TZS 0</span>
+  </div>
+  
+  <!-- Footer -->
+  <div style="text-align:center; border-top:1px dashed #ccc; margin-top:6px; padding-top:6px;">
+    <p style="font-size:10px; margin:2px 0; color:#999;">Thank you! Come Again!</p>
+    <p style="font-size:8px; margin:0; color:#ccc;">Powered by KazMart POS</p>
+  </div>
+  
+</div>
+
+  <!-- MAIN JAVASCRIPT -->
+  <script type="module" src="js/app.js"></script>
+
+<!-- ============================================================
+     PRODUCT MODAL – Mini-Cart Builder
+     ============================================================ -->
+<div id="productModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; z-index:1000; backdrop-filter:blur(4px);">
+  <div style="background:#fff; border-radius:12px; padding:20px; width:620px; max-width:95vw; max-height:92vh; overflow-y:auto; box-shadow:0 12px 60px rgba(0,0,0,0.25);">
+
+    <!-- Header -->
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:2px solid #EAF4F9; padding-bottom:10px;">
+      <span style="font-size:18px; font-weight:700; color:#0B5394;">🛒 Quick Add</span>
+      <button id="modalCloseBtn" style="background:none; border:none; font-size:24px; cursor:pointer; color:#999;">✕</button>
+    </div>
+
+    <!-- SINGLE COLUMN -->
+    <div>
+
+      <!-- CUSTOMER SEARCH -->
+      <div style="margin-bottom:10px;">
+        <label style="font-size:11px; font-weight:600; color:#595959; display:block; margin-bottom:3px;">👤 Search Customer</label>
+        <input type="text" id="modalCustomerSearch" placeholder="Name, card, or phone..." style="width:100%; padding:8px 12px; border:1.5px solid #C9E8F3; border-radius:6px; font-size:13px; box-sizing:border-box; outline:none;">
+        <div id="modalCustomerDropdown" style="display:none; background:#fff; border:1px solid #C9E8F3; border-radius:6px; max-height:160px; overflow-y:auto; margin-top:4px; box-shadow:0 4px 12px rgba(0,0,0,0.08);"></div>
+      </div>
+
+      <!-- CUSTOMER INFO (hidden by default) -->
+      <div id="modalCustomerInfo" style="display:none; background:#EAF4F9; border-radius:6px; padding:8px 12px; margin-bottom:10px; border:1px solid #C9E8F3;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <span style="font-weight:700; color:#0B5394;" id="modalCustName">—</span>
+            <span style="font-size:11px; color:#999; margin-left:8px;" id="modalCustCard">—</span>
+          </div>
+          <span id="modalCustStatus" style="font-size:10px; padding:2px 10px; border-radius:10px; background:#1E7B34; color:#fff;">Active</span>
+        </div>
+        <div style="display:flex; gap:14px; font-size:12px; color:#595959; margin-top:4px; flex-wrap:wrap;">
+          <span>Points: <strong id="modalCustPoints" style="color:#117594;">0</strong></span>
+          <span>Debt: <strong id="modalCustDebt" style="color:#CC0000;">TZS 0</strong></span>
+          <span>Last Visit: <strong id="modalCustLastVisit">—</strong></span>
+          <span>Days Since: <strong id="modalCustDays">—</strong></span>
+        </div>
+        <div id="modalCustDebtWarning" style="display:none; background:#FEF3C7; padding:4px 8px; border-radius:4px; font-size:11px; color:#B45309; margin-top:4px;">⚠️ Outstanding debt!</div>
+      </div>
+
+      <!-- PRODUCT SEARCH (with barcode support) -->
+      <div style="margin-bottom:8px;">
+        <label style="font-size:11px; font-weight:600; color:#595959; display:block; margin-bottom:3px;">🔍 Search Product or Scan Barcode</label>
+        <input type="text" id="modalProductSearch" placeholder="Type product name or scan barcode..." style="width:100%; padding:8px 12px; border:1.5px solid #C9E8F3; border-radius:6px; font-size:13px; box-sizing:border-box; outline:none;">
+      </div>
+
+      <!-- PRODUCT SEARCH RESULTS (shows only when searching) -->
+      <div id="modalSearchResults" style="display:none; max-height:160px; overflow-y:auto; border:1px solid #DDE6EA; border-radius:6px; padding:4px; background:#fff;">
+        <div style="text-align:center; padding:12px; color:#999; font-size:13px;">Type to search...</div>
+      </div>
+
+      <!-- SELECTED PRODUCT INFO (shows when a product is selected) -->
+      <div id="modalSelectedProduct" style="display:none; background:#EAF4F9; border-radius:6px; padding:6px 10px; margin-top:6px; font-size:13px;">
+        <span id="modalSelectedName" style="font-weight:600; color:#0B5394;">—</span>
+        <span id="modalSelectedPrice" style="color:#117594; margin-left:10px;">TZS 0</span>
+        <span id="modalSelectedStock" style="color:#999; font-size:12px; margin-left:10px;">Stock: 0</span>
+      </div>
+
+      <!-- QUANTITY & DISCOUNT (shows when a product is selected) -->
+      <div id="modalAddSection" style="display:none; margin-top:8px;">
+        <div style="display:flex; gap:8px; align-items:center;">
+          <div style="flex:1;">
+            <label style="font-size:11px; font-weight:600; color:#595959; display:block; margin-bottom:2px;">Qty</label>
+            <input type="number" id="modalQty" value="1" min="1" style="width:100%; padding:8px 10px; border:1.5px solid #C9E8F3; border-radius:6px; font-size:14px; box-sizing:border-box;">
+          </div>
+          <div style="flex:2;">
+            <label style="font-size:11px; font-weight:600; color:#595959; display:block; margin-bottom:2px;">Discount (TZS)</label>
+            <input type="number" id="modalDiscount" value="0" min="0" style="width:100%; padding:8px 10px; border:1.5px solid #C9E8F3; border-radius:6px; font-size:14px; box-sizing:border-box;">
+          </div>
+          <div style="flex:0 0 auto;">
+            <button id="modalAddBtn" style="padding:8px 16px; background:#117594; color:#fff; border:none; border-radius:6px; font-weight:700; font-size:14px; cursor:pointer; box-shadow:0 3px 0 #0D5A70; margin-top:14px;">+ Add</button>
+          </div>
+        </div>
+        <div id="modalBundleRow" style="display:none; margin-top:4px;">
+          <label style="font-size:11px; font-weight:600; color:#595959; display:block; margin-bottom:2px;">Bundle</label>
+          <select id="modalIsBundle" style="width:100%; padding:6px 10px; border:1.5px solid #C9E8F3; border-radius:6px; font-size:13px;">
+            <option value="no">No — single units</option>
+            <option value="yes">Yes — bundle</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- MINI CART -->
+      <div style="margin-top:12px; border-top:1px solid #DDE6EA; padding-top:10px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+          <span style="font-size:13px; font-weight:700; color:#0B5394;">📋 Mini Cart (<span id="modalMiniCartCount">0</span>)</span>
+          <button id="modalClearMiniCart" style="background:none; border:none; color:#CC0000; font-size:11px; cursor:pointer; font-weight:600;">Clear All</button>
+        </div>
+        <div id="modalMiniCartItems" style="max-height:150px; overflow-y:auto; background:#f9fafb; border-radius:6px; padding:4px; font-size:12px; border:1px solid #DDE6EA;">
+          <div style="text-align:center; padding:16px; color:#999;">No items added yet</div>
+        </div>
+        <div style="display:flex; justify-content:space-between; font-size:14px; font-weight:700; color:#0B5394; margin-top:6px;">
+          <span>Mini Total:</span>
+          <span id="modalMiniTotal">TZS 0</span>
+        </div>
+      </div>
+
+      <!-- ACTION BUTTONS -->
+      <div style="display:flex; gap:10px; margin-top:12px; border-top:1px solid #eee; padding-top:12px; justify-content:flex-end;">
+        <button id="modalCancelBtn" style="padding:8px 18px; background:#e0e0e0; color:#595959; border:none; border-radius:6px; cursor:pointer; font-weight:600; font-size:13px;">Cancel</button>
+        <button id="modalAddAllBtn" style="padding:8px 24px; background:#117594; color:#fff; border:none; border-radius:6px; cursor:pointer; font-weight:700; font-size:14px; box-shadow:0 3px 0 #0D5A70;">📦 Add All to Cart</button>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<!-- Edit Product Modal -->
+<div id="editProductModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.45); align-items:center; justify-content:center; z-index:1000;">
+  <div style="background:#fff; border-radius:10px; padding:24px; width:450px; max-width:95vw; box-shadow:0 8px 40px rgba(0,0,0,0.2);">
+    <div style="font-size:18px; font-weight:700; color:#0B5394; margin-bottom:16px;">✏️ Edit Product</div>
+    <input type="hidden" id="editProductId">
+    <div style="margin-bottom:12px;">
+      <label style="font-size:12px; color:#595959; font-weight:600; display:block; margin-bottom:4px;">Product Name</label>
+      <input type="text" id="editProductName" style="width:100%; padding:8px 12px; border:1.5px solid #C9E8F3; border-radius:6px; font-size:13px; box-sizing:border-box;">
+    </div>
+    <div style="margin-bottom:12px;">
+      <label style="font-size:12px; color:#595959; font-weight:600; display:block; margin-bottom:4px;">Selling Price (TZS)</label>
+      <input type="number" id="editSellingPrice" style="width:100%; padding:8px 12px; border:1.5px solid #C9E8F3; border-radius:6px; font-size:13px; box-sizing:border-box;">
+    </div>
+    <div style="margin-bottom:12px;">
+      <label style="font-size:12px; color:#595959; font-weight:600; display:block; margin-bottom:4px;">WAC (TZS)</label>
+      <input type="number" id="editWac" style="width:100%; padding:8px 12px; border:1.5px solid #C9E8F3; border-radius:6px; font-size:13px; box-sizing:border-box;">
+    </div>
+    <div style="margin-bottom:12px;">
+      <label style="font-size:12px; color:#595959; font-weight:600; display:block; margin-bottom:4px;">Category</label>
+      <input type="text" id="editCategory" style="width:100%; padding:8px 12px; border:1.5px solid #C9E8F3; border-radius:6px; font-size:13px; box-sizing:border-box;">
+    </div>
+    <div style="margin-bottom:12px;">
+      <label style="font-size:12px; color:#595959; font-weight:600; display:block; margin-bottom:4px;">Bundle Available</label>
+      <select id="editBundleAvail" style="width:100%; padding:8px 12px; border:1.5px solid #C9E8F3; border-radius:6px; font-size:13px; box-sizing:border-box;">
+        <option value="NO">NO</option>
+        <option value="YES">YES</option>
+      </select>
+    </div>
+    <div style="margin-bottom:12px;">
+      <label style="font-size:12px; color:#595959; font-weight:600; display:block; margin-bottom:4px;">Bundle Size</label>
+      <input type="number" id="editBundleSize" style="width:100%; padding:8px 12px; border:1.5px solid #C9E8F3; border-radius:6px; font-size:13px; box-sizing:border-box;">
+    </div>
+    <div style="margin-bottom:16px;">
+      <label style="font-size:12px; color:#595959; font-weight:600; display:block; margin-bottom:4px;">Bundle Price (TZS)</label>
+      <input type="number" id="editBundlePrice" style="width:100%; padding:8px 12px; border:1.5px solid #C9E8F3; border-radius:6px; font-size:13px; box-sizing:border-box;">
+    </div>
+    <div style="display:flex; gap:8px; justify-content:flex-end;">
+      <button id="editProductCancel" style="padding:8px 16px; background:#e0e0e0; color:#595959; border:none; border-radius:6px; cursor:pointer; font-weight:600;">Cancel</button>
+      <button id="editProductSave" style="padding:8px 20px; background:#117594; color:#fff; border:none; border-radius:6px; cursor:pointer; font-weight:600; box-shadow:0 3px 0 #0D5A70;">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- ─── CUSTOMER MODALS ────────────────────────────────────── -->
+
+<!-- Add/Edit Customer Modal -->
+<div id="customerModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); backdrop-filter:blur(6px); z-index:10000; align-items:center; justify-content:center; padding:20px;">
+  <div style="background:#fff; border-radius:16px; padding:24px; width:580px; max-width:95vw; max-height:90vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+      <h3 style="color:#0B5394; margin:0; font-size:20px; font-family:'Century Gothic','Trebuchet MS',Arial,sans-serif;" id="customerModalTitle">Add Customer</h3>
+      <button onclick="closeCustomerModal()" style="background:none; border:none; font-size:24px; cursor:pointer; color:#999;">✕</button>
+    </div>
+    <input type="hidden" id="customerModalId">
+    
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+      <div>
+        <label style="font-size:11px; font-weight:600; color:#595959; display:block; margin-bottom:4px;">Card Number</label>
+        <input type="text" id="customerFormCard" style="width:100%; padding:8px 12px; border:1.5px solid #C9E8F3; border-radius:6px; font-size:13px; box-sizing:border-box; background:#f5f5f5;" disabled>
+      </div>
+      <div>
+        <label style="font-size:11px; font-weight:600; color:#595959; display:block; margin-bottom:4px;">Customer Name *</label>
+        <input type="text" id="customerFormName" placeholder="Full name" style="width:100%; padding:8px 12px; border:1.5px solid #C9E8F3; border-radius:6px; font-size:13px; box-sizing:border-box;">
+      </div>
+      <div>
+        <label style="font-size:11px; font-weight:600; color:#595959; display:block; margin-bottom:4px;">Phone</label>
+        <input type="text" id="customerFormPhone" placeholder="Phone number" style="width:100%; padding:8px 12px; border:1.5px solid #C9E8F3; border-radius:6px; font-size:13px; box-sizing:border-box;">
+      </div>
+      <div>
+        <label style="font-size:11px; font-weight:600; color:#595959; display:block; margin-bottom:4px;">Email</label>
+        <input type="email" id="customerFormEmail" placeholder="Email address" style="width:100%; padding:8px 12px; border:1.5px solid #C9E8F3; border-radius:6px; font-size:13px; box-sizing:border-box;">
+      </div>
+      <div>
+        <label style="font-size:11px; font-weight:600; color:#595959; display:block; margin-bottom:4px;">Points Balance</label>
+        <input type="number" id="customerFormPoints" placeholder="0" style="width:100%; padding:8px 12px; border:1.5px solid #C9E8F3; border-radius:6px; font-size:13px; box-sizing:border-box;">
+      </div>
+      <div>
+        <label style="font-size:11px; font-weight:600; color:#595959; display:block; margin-bottom:4px;">Total Debt (TZS)</label>
+        <input type="number" id="customerFormDebt" placeholder="0" style="width:100%; padding:8px 12px; border:1.5px solid #C9E8F3; border-radius:6px; font-size:13px; box-sizing:border-box;">
+      </div>
+      <div>
+        <label style="font-size:11px; font-weight:600; color:#595959; display:block; margin-bottom:4px;">Total Amount Spent</label>
+        <input type="number" id="customerFormSpent" placeholder="0" style="width:100%; padding:8px 12px; border:1.5px solid #C9E8F3; border-radius:6px; font-size:13px; box-sizing:border-box;">
+      </div>
+      <div>
+        <label style="font-size:11px; font-weight:600; color:#595959; display:block; margin-bottom:4px;">Total Visits</label>
+        <input type="number" id="customerFormVisits" placeholder="0" style="width:100%; padding:8px 12px; border:1.5px solid #C9E8F3; border-radius:6px; font-size:13px; box-sizing:border-box;">
+      </div>
+      <div>
+        <label style="font-size:11px; font-weight:600; color:#595959; display:block; margin-bottom:4px;">Points Earned (Lifetime)</label>
+        <input type="number" id="customerFormPointsEarned" placeholder="0" style="width:100%; padding:8px 12px; border:1.5px solid #C9E8F3; border-radius:6px; font-size:13px; box-sizing:border-box;">
+      </div>
+      <div>
+        <label style="font-size:11px; font-weight:600; color:#595959; display:block; margin-bottom:4px;">Points Redeemed (Lifetime)</label>
+        <input type="number" id="customerFormPointsRedeemed" placeholder="0" style="width:100%; padding:8px 12px; border:1.5px solid #C9E8F3; border-radius:6px; font-size:13px; box-sizing:border-box;">
+      </div>
+      <div>
+        <label style="font-size:11px; font-weight:600; color:#595959; display:block; margin-bottom:4px;">Preferred Payment</label>
+        <select id="customerFormPayment" style="width:100%; padding:8px 12px; border:1.5px solid #C9E8F3; border-radius:6px; font-size:13px; box-sizing:border-box;">
+          <option value="Cash">Cash</option>
+          <option value="Card">Card</option>
+          <option value="Mobile Money">Mobile Money</option>
+          <option value="Bank Transfer">Bank Transfer</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div>
+        <label style="font-size:11px; font-weight:600; color:#595959; display:block; margin-bottom:4px;">Status</label>
+        <select id="customerFormStatus" style="width:100%; padding:8px 12px; border:1.5px solid #C9E8F3; border-radius:6px; font-size:13px; box-sizing:border-box;">
+          <option value="Active">Active</option>
+          <option value="Inactive">Inactive</option>
+          <option value="Blacklisted">Blacklisted</option>
+        </select>
+      </div>
+      <div>
+        <label style="font-size:11px; font-weight:600; color:#595959; display:block; margin-bottom:4px;">Debt Status</label>
+        <select id="customerFormDebtStatus" style="width:100%; padding:8px 12px; border:1.5px solid #C9E8F3; border-radius:6px; font-size:13px; box-sizing:border-box;">
+          <option value="Clear">Clear</option>
+          <option value="Pending">Pending</option>
+          <option value="Overdue">Overdue</option>
+        </select>
+      </div>
+      <div style="grid-column:1/-1;">
+        <label style="font-size:11px; font-weight:600; color:#595959; display:block; margin-bottom:4px;">Notes</label>
+        <textarea id="customerFormNotes" rows="2" placeholder="Additional notes..." style="width:100%; padding:8px 12px; border:1.5px solid #C9E8F3; border-radius:6px; font-size:13px; box-sizing:border-box; resize:vertical;"></textarea>
+      </div>
+    </div>
+
+    <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:16px; border-top:1px solid #eee; padding-top:14px;">
+      <button onclick="closeCustomerModal()" style="padding:8px 20px; background:#e0e0e0; color:#595959; border:none; border-radius:6px; cursor:pointer; font-weight:600;">Cancel</button>
+      <button id="customerModalSaveBtn" onclick="saveCustomer()" style="padding:8px 20px; background:#117594; color:#fff; border:none; border-radius:6px; cursor:pointer; font-weight:600; box-shadow:0 3px 0 #0D5A70;">💾 Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Customer Profile View Modal -->
+<div id="customerProfileModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); backdrop-filter:blur(6px); z-index:10001; align-items:center; justify-content:center; padding:20px;">
+  <div style="background:#fff; border-radius:16px; padding:24px; width:700px; max-width:95vw; max-height:90vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+      <h3 style="color:#0B5394; margin:0; font-size:20px; font-family:'Century Gothic','Trebuchet MS',Arial,sans-serif;">👤 Customer Profile</h3>
+      <button onclick="closeCustomerProfile()" style="background:none; border:none; font-size:24px; cursor:pointer; color:#999;">✕</button>
+    </div>
+    <div id="customerProfileContent">
+      <div style="text-align:center; padding:40px; color:#999;">Loading...</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ─── CUSTOM CONFIRMATION DIALOG ────────────────────────── -->
+<div id="confirmationDialog" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); backdrop-filter:blur(8px); z-index:9999; align-items:center; justify-content:center; animation:fadeIn 0.3s ease;">
+  <div style="background:#fff; border-radius:20px; padding:32px 40px; max-width:420px; width:90%; box-shadow:0 30px 60px rgba(0,0,0,0.3); transform:scale(0.9); animation:scaleIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; text-align:center;">
+    <div style="font-size:24px; margin-bottom:8px;">⚠️</div>
+    <div style="font-size:18px; font-weight:700; color:#0B5394; margin-bottom:8px;" id="confirmationMessage">Are you sure?</div>
+    <div style="font-size:13px; color:#999; margin-bottom:20px;" id="confirmationSubMessage">This action cannot be undone.</div>
+    <div style="display:flex; gap:12px; justify-content:center;">
+      <button id="confirmationCancel" style="padding:10px 24px; background:#e0e0e0; color:#595959; border:none; border-radius:10px; cursor:pointer; font-weight:600; font-size:14px; font-family:inherit; transition:all 0.15s; flex:1;">
+        Cancel
+      </button>
+      <button id="confirmationConfirm" style="padding:10px 24px; background:#117594; color:#fff; border:none; border-radius:10px; cursor:pointer; font-weight:600; font-size:14px; font-family:inherit; box-shadow:0 4px 0 #0D5A70; transition:all 0.12s; flex:1;">
+        Confirm
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ─── CUSTOM NOTIFICATION MODAL ──────────────────────────── -->
+<div id="notificationModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); backdrop-filter:blur(6px); z-index:10001; align-items:center; justify-content:center; padding:20px;">
+  <div id="notificationCard" style="background:#fff; border-radius:20px; padding:40px 48px; max-width:440px; width:100%; box-shadow:0 20px 60px rgba(0,0,0,0.3), 0 0 0 2px rgba(255,255,255,0.1) inset; transform:scale(0.8); text-align:center;">
+    <!-- Icon -->
+    <div style="font-size:64px; margin-bottom:12px; display:flex; justify-content:center;">
+      <span style="display:inline-block; background:#1E7B34; color:#fff; width:80px; height:80px; border-radius:50%; line-height:80px; text-align:center; font-size:48px; box-shadow:0 8px 24px rgba(30,123,52,0.3);">✓</span>
+    </div>
+    <!-- Title -->
+    <div id="notificationTitle" style="font-size:24px; font-weight:800; color:#0B5394; margin-bottom:8px;">Sale Complete!</div>
+    <!-- Message -->
+    <div id="notificationMessage" style="font-size:16px; color:#595959; margin-bottom:20px; line-height:1.6;">
+      Total: TZS 500<br>Change: TZS 0
+    </div>
+    <!-- Button -->
+    <button id="notificationOkBtn" style="padding:12px 40px; background:#117594; color:#fff; border:none; border-radius:10px; font-size:16px; font-weight:700; cursor:pointer; box-shadow:0 4px 0 #0B3B4A, 0 4px 16px rgba(17,117,148,0.3); transition:all 0.12s; font-family:inherit;" 
+            onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 0 #0B3B4A, 0 6px 20px rgba(17,117,148,0.4)';" 
+            onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 0 #0B3B4A, 0 4px 16px rgba(17,117,148,0.3)';" 
+            onmousedown="this.style.transform='translateY(2px)';this.style.boxShadow='0 2px 0 #0B3B4A';" 
+            onmouseup="this.style.transform='translateY(-1px)';this.style.boxShadow='0 5px 0 #0B3B4A';">
+      OK
+    </button>
+  </div>
+</div>
+
+</body>
+</html>

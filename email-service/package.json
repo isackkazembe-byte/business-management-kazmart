@@ -1,0 +1,14 @@
+{
+  "name": "email-service",
+  "version": "1.0.0",
+  "description": "Sends emails via SendGrid",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "@sendgrid/mail": "^7.7.0",
+    "cors": "^2.8.5"
+  }
+}

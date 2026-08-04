@@ -1,0 +1,58 @@
+<div style="background:#117594; color:#fff; padding:4px 16px; display:flex; justify-content:space-between; align-items:center; font-family: 'Century Gothic', 'Trebuchet MS', Arial, sans-serif; flex-wrap:wrap; gap:4px; box-shadow:0 2px 8px rgba(0,0,0,0.15); min-height:55px; width:100%;">
+
+  <!-- LEFT: Logo -->
+<div style="display:flex; align-items:center; flex-shrink:0; gap:8px;">
+  <img src="images/logo.png" alt="KazMart" style="height:46px; width:auto; border-radius:4px;" />
+  <span style="font-size:18px; font-weight:700; letter-spacing:0.5px; color:#fff; display:flex; align-items:center; gap:6px;">
+    <span style="color:#FF0000; font-size:20px;">🛒</span> KazMart
+  </span>
+</div>
+
+  <!-- CENTER: Clock + User -->
+  <div style="display:flex; align-items:center; gap:12px; background:rgba(255,255,255,0.08); padding:6px 18px; border-radius:8px; border:1px solid rgba(255,255,255,0.12); box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+    <span id="clockDisplay" style="font-family:'Courier New',monospace; font-size:22px; font-weight:700; letter-spacing:1px;">--:--:--</span>
+    <span style="opacity:0.4; font-size:18px;">|</span>
+    <div style="display:flex; flex-direction:column; align-items:flex-start; gap:0;">
+      <span id="userDisplay" style="font-weight:600; font-size:13px; line-height:1.2;">User</span>
+      <span id="userRole" style="font-weight:400; font-size:9px; color:rgba(255,255,255,0.6); line-height:1.2;">Admin</span>
+    </div>
+  </div>
+
+  <!-- RIGHT: Action Buttons -->
+  <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap; flex-shrink:0;">
+    <button id="btnCustomerView" onclick="window.open('pages/customerpage.html', '_blank', 'width=1200,height=900,scrollbars=yes');" class="btn-topbar-3d" style="background:rgba(255,255,255,0.12); color:#fff; border:1px solid rgba(255,255,255,0.2); padding:6px 14px; border-radius:4px; cursor:pointer; font-size:13px; font-weight:600; font-family:inherit; white-space:nowrap; box-shadow:0 3px 0 rgba(0,0,0,0.12),0 4px 8px rgba(0,0,0,0.08); transition:all 0.1s ease; transform:translateY(0);" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 5px 0 rgba(0,0,0,0.12),0 8px 16px rgba(0,0,0,0.15)';" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 3px 0 rgba(0,0,0,0.12),0 4px 8px rgba(0,0,0,0.08)';" onmousedown="this.style.transform='translateY(2px)';this.style.boxShadow='0 1px 0 rgba(0,0,0,0.12)';" onmouseup="this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 0 rgba(0,0,0,0.12)';">
+  👁️ Customer
+</button>
+    <button class="btn-topbar-3d" data-page="debts" style="background:rgba(255,255,255,0.12); color:#fff; border:1px solid rgba(255,255,255,0.2); padding:6px 14px; border-radius:4px; cursor:pointer; font-size:13px; font-weight:600; font-family:inherit; white-space:nowrap; box-shadow:0 3px 0 rgba(0,0,0,0.12),0 4px 8px rgba(0,0,0,0.08); transition:all 0.1s ease; transform:translateY(0);" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 5px 0 rgba(0,0,0,0.12),0 8px 16px rgba(0,0,0,0.15)';" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 3px 0 rgba(0,0,0,0.12),0 4px 8px rgba(0,0,0,0.08)';" onmousedown="this.style.transform='translateY(2px)';this.style.boxShadow='0 1px 0 rgba(0,0,0,0.12)';" onmouseup="this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 0 rgba(0,0,0,0.12)';">
+      💰 Debts
+    </button>
+    <button class="btn-topbar-3d" data-page="stock" style="background:rgba(255,255,255,0.12); color:#fff; border:1px solid rgba(255,255,255,0.2); padding:6px 14px; border-radius:4px; cursor:pointer; font-size:13px; font-weight:600; font-family:inherit; white-space:nowrap; box-shadow:0 3px 0 rgba(0,0,0,0.12),0 4px 8px rgba(0,0,0,0.08); transition:all 0.1s ease; transform:translateY(0);" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 5px 0 rgba(0,0,0,0.12),0 8px 16px rgba(0,0,0,0.15)';" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 3px 0 rgba(0,0,0,0.12),0 4px 8px rgba(0,0,0,0.08)';" onmousedown="this.style.transform='translateY(2px)';this.style.boxShadow='0 1px 0 rgba(0,0,0,0.12)';" onmouseup="this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 0 rgba(0,0,0,0.12)';">
+      📦 Stock
+    </button>
+    <button class="btn-topbar-3d" data-page="cash" style="background:rgba(255,255,255,0.12); color:#fff; border:1px solid rgba(255,255,255,0.2); padding:6px 14px; border-radius:4px; cursor:pointer; font-size:13px; font-weight:600; font-family:inherit; white-space:nowrap; box-shadow:0 3px 0 rgba(0,0,0,0.12),0 4px 8px rgba(0,0,0,0.08); transition:all 0.1s ease; transform:translateY(0);" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 5px 0 rgba(0,0,0,0.12),0 8px 16px rgba(0,0,0,0.15)';" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 3px 0 rgba(0,0,0,0.12),0 4px 8px rgba(0,0,0,0.08)';" onmousedown="this.style.transform='translateY(2px)';this.style.boxShadow='0 1px 0 rgba(0,0,0,0.12)';" onmouseup="this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 0 rgba(0,0,0,0.12)';">
+      💵 Cash
+    </button>
+    <button class="btn-topbar-3d" data-page="reports" style="background:rgba(255,255,255,0.12); color:#fff; border:1px solid rgba(255,255,255,0.2); padding:6px 14px; border-radius:4px; cursor:pointer; font-size:13px; font-weight:600; font-family:inherit; white-space:nowrap; box-shadow:0 3px 0 rgba(0,0,0,0.12),0 4px 8px rgba(0,0,0,0.08); transition:all 0.1s ease; transform:translateY(0);" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 5px 0 rgba(0,0,0,0.12),0 8px 16px rgba(0,0,0,0.15)';" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 3px 0 rgba(0,0,0,0.12),0 4px 8px rgba(0,0,0,0.08)';" onmousedown="this.style.transform='translateY(2px)';this.style.boxShadow='0 1px 0 rgba(0,0,0,0.12)';" onmouseup="this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 0 rgba(0,0,0,0.12)';">
+      📊 Reports
+    </button>
+    <button class="btn-topbar-3d" data-page="customer" 
+        style="background:rgba(255,255,255,0.12); color:#fff; border:1px solid rgba(255,255,255,0.2); padding:6px 14px; border-radius:4px; cursor:pointer; font-size:13px; font-weight:600; font-family:inherit; white-space:nowrap; box-shadow:0 3px 0 rgba(0,0,0,0.12),0 4px 8px rgba(0,0,0,0.08); transition:all 0.1s ease; transform:translateY(0);" 
+        onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 5px 0 rgba(0,0,0,0.12),0 8px 16px rgba(0,0,0,0.15)';" 
+        onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 3px 0 rgba(0,0,0,0.12),0 4px 8px rgba(0,0,0,0.08)';" 
+        onmousedown="this.style.transform='translateY(2px)';this.style.boxShadow='0 1px 0 rgba(0,0,0,0.12)';" 
+        onmouseup="this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 0 rgba(0,0,0,0.12)';">
+  👥 Customers Info
+</button>
+    
+    <button class="btn-topbar-3d" data-page="settings" style="background:rgba(255,255,255,0.12); color:#fff; border:1px solid rgba(255,255,255,0.2); padding:6px 14px; border-radius:4px; cursor:pointer; font-size:13px; font-weight:600; font-family:inherit; white-space:nowrap; box-shadow:0 3px 0 rgba(0,0,0,0.12),0 4px 8px rgba(0,0,0,0.08); transition:all 0.1s ease; transform:translateY(0);" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 5px 0 rgba(0,0,0,0.12),0 8px 16px rgba(0,0,0,0.15)';" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 3px 0 rgba(0,0,0,0.12),0 4px 8px rgba(0,0,0,0.08)';" onmousedown="this.style.transform='translateY(2px)';this.style.boxShadow='0 1px 0 rgba(0,0,0,0.12)';" onmouseup="this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 0 rgba(0,0,0,0.12)';">
+      ⚙️ Settings
+    </button>
+    <button id="btnRefresh" style="background:rgba(76,175,80,0.25); color:#fff; border:1px solid rgba(255,255,255,0.2); padding:6px 14px; border-radius:4px; cursor:pointer; font-size:13px; font-weight:600; font-family:inherit; white-space:nowrap; box-shadow:0 3px 0 rgba(0,0,0,0.12),0 4px 8px rgba(0,0,0,0.08); transition:all 0.1s ease; transform:translateY(0);" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 5px 0 rgba(0,0,0,0.12),0 8px 16px rgba(0,0,0,0.15)';" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 3px 0 rgba(0,0,0,0.12),0 4px 8px rgba(0,0,0,0.08)';" onmousedown="this.style.transform='translateY(2px)';this.style.boxShadow='0 1px 0 rgba(0,0,0,0.12)';" onmouseup="this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 0 rgba(0,0,0,0.12)';">
+      ⟳ Refresh
+    </button>
+    <!-- 👇 Updated Logout Button -->
+    <button id="btnLogout" style="background:rgba(204,0,0,0.5); color:#fff; border:1px solid rgba(255,255,255,0.2); padding:6px 14px; border-radius:4px; cursor:pointer; font-size:13px; font-weight:600; font-family:inherit; white-space:nowrap; box-shadow:0 3px 0 rgba(0,0,0,0.12),0 4px 8px rgba(0,0,0,0.08); transition:all 0.1s ease; transform:translateY(0);" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 5px 0 rgba(0,0,0,0.12),0 8px 16px rgba(0,0,0,0.15)';" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 3px 0 rgba(0,0,0,0.12),0 4px 8px rgba(0,0,0,0.08)';" onmousedown="this.style.transform='translateY(2px)';this.style.boxShadow='0 1px 0 rgba(0,0,0,0.12)';" onmouseup="this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 0 rgba(0,0,0,0.12)';">
+      🚪 Log Out
+    </button>
+  </div>
+</div>

@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Import Stock In History</title>
+  <style>
+    body { font-family: 'Century Gothic', Arial, sans-serif; background: #f4f8fa; padding: 30px; }
+    .container { max-width: 900px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+    h1 { color: #0B5394; }
+    .drop-zone { border: 2px dashed #C9E8F3; border-radius: 8px; padding: 40px; text-align: center; cursor: pointer; transition: background 0.2s; }
+    .drop-zone:hover { background: #EAF4F9; }
+    .drop-zone.dragover { background: #C9E8F3; border-color: #117594; }
+    button { background: #117594; color: #fff; border: none; padding: 12px 30px; border-radius: 6px; font-size: 16px; font-weight: 700; cursor: pointer; margin-top: 10px; }
+    button:hover { background: #0D5A70; }
+    .log { background: #f0f0f0; padding: 10px; border-radius: 6px; font-family: 'Courier New', monospace; font-size: 12px; max-height: 400px; overflow-y: auto; white-space: pre-wrap; margin-top: 10px; }
+    .success { color: #1E7B34; }
+    .error { color: #CC0000; }
+    .info { color: #0B5394; }
+    .warning { color: #B45309; }
+    #fileInput { display: none; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>📦 Import Stock In History</h1>
+  <p>Upload <strong>stockin.csv</strong> with columns: Date, Item, Qty Purchased, Total Amount, Unit Price, Supplier Name</p>
+  <div class="drop-zone" id="dropZone">
+    <p style="font-size: 18px; color: #0B5394;">📂 Drag & drop your CSV file here</p>
+    <p style="color: #999;">or click to select</p>
+  </div>
+  <input type="file" id="fileInput" accept=".csv">
+  <button id="importBtn" disabled>🚀 Import Stock In</button>
+  <div id="log" class="log">Ready to import...</div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/12.15.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore-compat.js"></script>
+<script>
+  // ─── Firebase Config ──────────────────────────────────────────
+  const firebaseConfig = {
+    apiKey: "AIzaSyA31nP6b9BuHvB4ffwQcKiHrs5vT7E0K4g",
+    authDomain: "biz-management-system-tz.firebaseapp.com",
+    projectId: "biz-management-system-tz",
+    storageBucket: "biz-management-system-tz.firebasestorage.app",
+    messagingSenderId: "246381480533",
+    appId: "1:246381480533:web:c6723c6277f61416e6e2dc"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+
+  // ─── DOM ──────────────────────────────────────────────────────
+  const dropZone = document.getElementById('dropZone');
+  const fileInput = document.getElementById('fileInput');
+  const importBtn = document.getElementById('importBtn');
+  const logEl = document.getElementById('log');
+  let selectedFile = null;
+
+  function log(msg, type) {
+    const colors = { success: '#1E7B34', error: '#CC0000', info: '#0B5394', warning: '#B45309' };
+    const color = colors[type] || '#333';
+    logEl.innerHTML += `<span style="color:${color}">${msg}</span>\n`;
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+
+  // ─── Drag & Drop ──────────────────────────────────────────────
+  dropZone.addEventListener('click', () => fileInput.click());
+  dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
+  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+  dropZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropZone.classList.remove('dragover');
+    if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+  });
+  fileInput.addEventListener('change', (e) => {
+    if (e.target.files.length) handleFile(e.target.files[0]);
+  });
+
+  function handleFile(file) {
+    if (!file.name.endsWith('.csv')) {
+      log('❌ Please select a CSV file.', 'error');
+      return;
+    }
+    selectedFile = file;
+    importBtn.disabled = false;
+    log(`✅ Selected: ${file.name} (${(file.size/1024).toFixed(1)} KB)`, 'success');
+  }
+
+  // ─── Parse CSV ──────────────────────────────────────────────
+  function parseCSV(text) {
+    const lines = text.trim().split('\n');
+    const headers = lines[0].split(',').map(h => h.trim());
+    return lines.slice(1).map(line => {
+      const values = [];
+      let current = '';
+      let inQuotes = false;
+      for (const char of line) {
+        if (char === '"') { inQuotes = !inQuotes; continue; }
+        if (char === ',' && !inQuotes) {
+          values.push(current.trim());
+          current = '';
+          continue;
+        }
+        current += char;
+      }
+      values.push(current.trim());
+      const obj = {};
+      headers.forEach((h, i) => {
+        let val = values[i] || '';
+        if (['Qty Purchased', 'Total Amount', 'Unit Price', 'Qty', 'Total', 'UnitPrice'].includes(h)) {
+          val = val.replace(/,/g, '').trim();
+          obj[h] = val === '' ? 0 : parseFloat(val) || 0;
+        } else {
+          obj[h] = val;
+        }
+      });
+      return obj;
+    });
+  }
+
+  // ─── Helper: parse date ──────────────────────────────────────
+  function parseDate(dateStr) {
+    if (!dateStr) return new Date();
+    let d = dateStr.trim();
+    // Try dd/MM/yyyy
+    let parts = d.split('/');
+    if (parts.length === 3 && parts[0].length <= 2 && parts[1].length <= 2 && parts[2].length === 4) {
+      let day = parseInt(parts[0]);
+      let month = parseInt(parts[1]) - 1;
+      let year = parseInt(parts[2]);
+      let dt = new Date(year, month, day);
+      if (!isNaN(dt)) return dt;
+    }
+    // Try dd-MMM-yyyy
+    parts = d.split('-');
+    if (parts.length === 3) {
+      let day = parseInt(parts[0]);
+      let monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      let month = monthNames.indexOf(parts[1].substring(0,3));
+      let year = parseInt(parts[2]);
+      if (!isNaN(day) && month !== -1 && !isNaN(year)) {
+        let dt = new Date(year, month, day);
+        if (!isNaN(dt)) return dt;
+      }
+    }
+    // Fallback
+    let dt = new Date(d);
+    if (!isNaN(dt)) return dt;
+    return new Date();
+  }
+
+  // ─── Import ──────────────────────────────────────────────────
+  importBtn.addEventListener('click', async function() {
+    if (!selectedFile) return;
+    this.disabled = true;
+    this.textContent = '⏳ Importing...';
+
+    try {
+      const text = await selectedFile.text();
+      log('📄 Parsing CSV...', 'info');
+      const rows = parseCSV(text);
+      log(`📦 ${rows.length} rows parsed.`, 'info');
+
+      // Group by product name
+      const productMap = {};
+      for (const row of rows) {
+        const name = row['Item'] || '';
+        if (!name) continue;
+        if (!productMap[name]) productMap[name] = [];
+        productMap[name].push(row);
+      }
+
+      let processed = 0;
+      let totalItems = 0;
+      const BATCH_SIZE = 100;
+      const allProductNames = Object.keys(productMap);
+
+      for (let i = 0; i < allProductNames.length; i += BATCH_SIZE) {
+        const batch = db.batch();
+        const chunk = allProductNames.slice(i, i + BATCH_SIZE);
+
+        for (const productName of chunk) {
+          const entries = productMap[productName];
+          // Find product by productName
+          const prodQuery = await db.collection('products').where('productName', '==', productName).limit(1).get();
+          if (prodQuery.empty) {
+            log(`⚠️ Product not found: ${productName}`, 'warning');
+            continue;
+          }
+          const productId = prodQuery.docs[0].id;
+
+          // Calculate total qty and total cost
+          let totalQty = 0, totalCost = 0;
+          let firstEntry = null;
+          for (const e of entries) {
+            if (!firstEntry) firstEntry = e;
+            const qty = e['Qty Purchased'] || 0;
+            const unitPrice = e['Unit Price'] || (e['Total Amount'] / (qty || 1)) || 0;
+            totalQty += qty;
+            totalCost += qty * unitPrice;
+          }
+          const wac = totalQty > 0 ? totalCost / totalQty : 0;
+
+          // Get current inventorySummary
+          const invQuery = await db.collection('inventorySummary').where('productId', '==', productId).limit(1).get();
+          let invRef;
+          if (!invQuery.empty) {
+            invRef = invQuery.docs[0].ref;
+            const currentQty = invQuery.docs[0].data().quantity || 0;
+            const currentWac = invQuery.docs[0].data().wac || 0;
+            const newQty = currentQty + totalQty;
+            const newWac = newQty > 0 ? ((currentQty * currentWac) + totalCost) / newQty : 0;
+            batch.update(invRef, { quantity: newQty, wac: newWac });
+          } else {
+            invRef = db.collection('inventorySummary').doc();
+            batch.set(invRef, { productId: productId, quantity: totalQty, wac: wac });
+          }
+
+          // Record inventory transactions for each entry
+          for (const e of entries) {
+            const qty = e['Qty Purchased'] || 0;
+            const unitPrice = e['Unit Price'] || (e['Total Amount'] / (qty || 1)) || 0;
+            const dateObj = parseDate(e['Date']);
+            const transRef = db.collection('inventoryTransactions').doc();
+            batch.set(transRef, {
+              productid: productId,
+              productName: productName,
+              quantity: qty,
+              transactionType: 'Purchase (Import)',
+              unitCost: unitPrice,
+              prevStock: 0,
+              newStock: 0,
+              createdAt: dateObj.toISOString(),
+              createdBy: 'import_script',
+              referenceId: 'import_stock',
+              remarks: `Supplier: ${e['Supplier Name'] || ''}`
+            });
+            totalItems++;
+          }
+          processed++;
+        }
+
+        await batch.commit();
+        log(`✅ Batch ${Math.floor(i/BATCH_SIZE)+1} committed (${Math.min(i+BATCH_SIZE, allProductNames.length)}/${allProductNames.length})`, 'success');
+      }
+
+      log(`\n📊 Summary:`, 'info');
+      log(`   ➕ Processed ${processed} products.`, 'success');
+      log(`   📦 ${totalItems} purchase entries imported.`, 'success');
+      log(`🎉 Import complete!`, 'success');
+
+    } catch (err) {
+      log(`❌ Import error: ${err.message}`, 'error');
+      console.error(err);
+    } finally {
+      this.disabled = false;
+      this.textContent = '🚀 Import Stock In';
+    }
+  });
+
+  log('📁 Drop your CSV file or click to select.', 'info');
+  log('📌 Expected headers: Date, Item, Qty Purchased, Total Amount, Unit Price, Supplier Name', 'info');
+</script>
+</body>
+</html>

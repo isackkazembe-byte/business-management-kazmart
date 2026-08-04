@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Kazmart Dashboard</title>
+
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+
+
+<body>
+
+    <header>
+
+        <h1>
+            Kazmart Biz System
+        </h1>
+
+        <p>
+            Business Management Dashboard
+        </p>
+
+    </header>
+
+
+    <main>
+
+        <h2 id="welcomeUser">
+    Welcome
+</h2>
+
+<p id="userRole">
+    Role:
+</p>
+
+
+        <div class="dashboard-menu">
+
+    <button onclick="openPage('pos.html')">
+        POS
+    </button>
+
+    <button onclick="openPage('inventory.html')">
+        Inventory
+    </button>
+
+    <button
+        id="productsModule"
+        onclick="openPage('products.html')">
+        Products
+    </button>
+
+    <button id="dashboardModule" ...>Dashboard</button>   (if you later add a dashboard button)
+
+<button id="posModule" onclick="openPage('pos.html')">
+    POS
+</button>
+
+<button id="inventoryModule" onclick="openPage('inventory.html')">
+    Inventory
+</button>
+
+<button id="customersModule" onclick="openPage('customers.html')">
+    Customers
+</button>
+
+<button id="purchasesModule" onclick="openPage('purchases.html')">
+    Purchases
+</button>
+
+<button id="debtsModule" onclick="openPage('debts.html')">
+    Debts
+</button>
+
+<button id="cashModule" onclick="openPage('cash.html')">
+    Cash Management
+</button>
+
+<button id="reportsModule" onclick="openPage('reports.html')">
+    Reports
+</button>
+
+    <div id="adminModules">
+
+        <button
+            id="usersModule"
+            onclick="openPage('users.html')">
+            Users
+        </button>
+
+        <button
+            id="settingsModule"
+            onclick="openPage('settings.html')">
+            Settings
+        </button>
+
+    </div>
+
+</div>
+
+
+    </main>
+
+<script type="module">
+
+import { requirePermission } from "../js/security.js";
+
+
+// User must have dashboard permission
+
+const user = requirePermission("dashboard");
+
+
+if(!user){
+
+    throw new Error("Unauthorized");
+
+}
+
+
+
+// Welcome
+
+document.getElementById("welcomeUser").innerText =
+"Welcome, " + user.name;
+
+
+document.getElementById("userRole").innerText =
+"Role: " + user.role;
+
+
+
+// List of dashboard modules
+
+const modules = {
+
+    pos: "posModule",
+
+    inventory: "inventoryModule",
+
+    products: "productsModule",
+
+    customers: "customersModule",
+
+    purchases: "purchasesModule",
+
+    debts: "debtsModule",
+
+    cash: "cashModule",
+
+    reports: "reportsModule"
+
+};
+
+
+// Hide modules without permission
+
+Object.entries(modules).forEach(([permission, elementId]) => {
+
+    if(!user.permissions.includes(permission)){
+
+        const element = document.getElementById(elementId);
+
+        if(element){
+
+            element.style.display = "none";
+
+        }
+
+    }
+
+});
+
+
+
+// Hide Users & Settings together
+
+if(!user.permissions.includes("users")){
+
+    document.getElementById("adminModules").style.display = "none";
+
+}
+
+
+
+window.openPage = function(page){
+
+    window.location.href = page;
+
+}
+
+</script>
+
+
+</body>
+
+</html>

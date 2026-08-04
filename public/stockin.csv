@@ -1,0 +1,81 @@
+Date,Time,User,Category,Group,Item,Qty Purchased,Total Amount,Unit Price,Supplier Name
+7/12/2026 13:26:13,7/12/2026 13:26:13,USR-001,Vinywaji,Bia,Serengeti:(Lg),20,"35,500","1,775",Mama-Anita
+7/12/2026 13:26:17,7/12/2026 13:26:17,USR-001,Vinywaji,Soda,Pepsi : 350ml,6,"3,000",500,Mama-Anita
+7/12/2026 13:26:20,7/12/2026 13:26:20,USR-001,Vinywaji,Soda,Mirinda-Black : 350ml,6,"3,000",500,Mama-Anita
+7/12/2026 13:26:24,7/12/2026 13:26:24,USR-001,Vinywaji,Soda,Stone Tangawizi : 350ml,2,"1,125",563,Mama-Anita
+7/12/2026 13:26:27,7/12/2026 13:26:27,USR-001,Vinywaji,Soda,Fanta-Passion : 350ml,4,"2,250",563,Mama-Anita
+7/12/2026 13:26:30,7/12/2026 13:26:30,USR-001,Vinywaji,Soda,Sparletta : 350ml,6,"3,375",563,Mama-Anita
+7/12/2026 13:26:33,7/12/2026 13:26:33,USR-001,Vinywaji,Soda,Fanta-Orange : 350ml,12,"6,750",563,Mama-Anita
+7/12/2026 13:33:26,7/12/2026 13:33:26,USR-001,Nafaka,Maharage,Maharage/Njano@2500,10,"25,000","2,500",Rama
+7/12/2026 13:35:09,7/12/2026 13:35:09,USR-001,Nafaka,Mchele,Mchele@1850,25,"46,250","1,850",Rama
+7/12/2026 13:36:05,7/12/2026 13:36:05,USR-001,Vinywaji,Spirit,Smart Gin-200ml,15,"28,000","1,867",Unknown
+7/12/2026 13:37:29,7/12/2026 13:37:29,USR-001,Vinywaji,Spirit,Double(KK)-200ml,15,"28,000","1,867",Mama-Anita
+7/12/2026 13:37:37,7/12/2026 13:37:37,USR-001,Usafi:Binafsi,Shampoo/Nywele,Tressa :Shampoo - 10ML,12,"1,500",125,Mama-Anita
+7/12/2026 13:37:40,7/12/2026 13:37:40,USR-001,Sigara & RIZLA,Sigara & RIZLA,Master(R),40,"4,800",120,Mama-Anita
+7/12/2026 13:48:17,7/12/2026 13:48:17,USR-001,Vinywaji,Spirit,Jobo-200ml,8,"14,336","1,792",Ngowi
+7/12/2026 13:48:20,7/12/2026 13:48:20,USR-001,Vinywaji,Spirit,K-vant(S)-250ml,12,"41,500","3,458",Ngowi
+7/12/2026 13:48:24,7/12/2026 13:48:24,USR-001,Vinywaji,Spirit,Konyagi(S)- 200ml,6,"23,700","3,950",Ngowi
+7/12/2026 14:12:39,7/12/2026 14:12:39,USR-002,Nafaka,Karanga,Karanga,5,"21,000","4,200",Unknown
+7/12/2026 14:12:43,7/12/2026 14:12:43,USR-002,Vinywaji,Juisi,U-Fresh:Bottled-Mango-200ml,24,"6,000",250,Unknown
+7/12/2026 14:12:52,7/12/2026 14:12:52,USR-002,Vinywaji,Juisi,U-Fresh:Tube-Mango-80ml,60,"5,000",83,Unknown
+7/12/2026 14:16:57,7/12/2026 14:16:57,USR-002,Vinywaji,Juisi,U-Fresh Glass (Mango)-120ml,28,"4,500",161,Unknown
+7/12/2026 20:31:32,7/12/2026 20:31:32,USR-002,Viungo,Mayai: Kizungu,Mayai@Kizungu,90,"28,500",317,MSB
+7/14/2026 9:43:24,7/14/2026 9:43:24,USR-002,Snaki,Snaki,Mimi-6g,60,"5,000",83,musa ma pipi
+7/14/2026 9:43:29,7/14/2026 9:43:29,USR-002,Afya,Dawa : Maumivu,Paracetamol - 500mg,100,"2,500",25,musa ma pipi
+7/14/2026 9:43:32,7/14/2026 9:43:32,USR-002,Vitamu,Pipi/Bigijii,Pipi:Bigijii@50,200,"7,000",35,musa ma pipi
+7/14/2026 9:43:37,7/14/2026 9:43:37,USR-002,Nafaka,Maandazi,"Tamu : Bakery Maandazi-12pcs@5,000",6,"2,500",417,tamu
+7/14/2026 9:43:42,7/14/2026 9:43:42,USR-002,Nafaka,Skonzi,"Tamu : Bakery Skonzi-4pcs@1,600",4,"1,600",400,tamu
+7/14/2026 18:59:15,7/14/2026 18:59:15,USR-002,Vitamu,Pipi/Bigijii,Pipi:Bigijii@100,100,"7,000",70,ma pipi
+7/14/2026 18:59:18,7/14/2026 18:59:18,USR-002,Gesi:Mtungi,Gesi:Mtungi,Taifa(L),1,"55,000","55,000",gas
+7/14/2026 19:02:18,7/14/2026 19:02:18,USR-002,Viungo,Mayai: Kizungu,Mayai@Kizungu,60,"19,000",317,MSB
+7/14/2026 19:07:24,7/14/2026 19:07:24,USR-002,Nafaka,Mkate,Tamu : Bakery Mkate-1pcs@800,6,"4,800",800,TAMU
+7/14/2026 19:07:29,7/14/2026 19:07:29,USR-002,Nafaka,Mkate,"MSB : Mkate Loaf-4pcs@1,600",8,"3,200",400,MSB
+7/15/2026 15:23:58,7/15/2026 15:23:58,USR-002,Gesi:Mtungi,Gesi:Mtungi,Oryx(L),1,"56,000","56,000",gas
+7/15/2026 15:24:02,7/15/2026 15:24:02,USR-002,Gesi:Mtungi,Gesi:Mtungi,Oryx(S),2,"49,000","24,500",gas
+7/15/2026 19:45:21,7/15/2026 19:45:21,USR-001,Usafi:Jumla,Sabuni : UNGA,Kleesoft-180g,40,"17,500",438,Tabasam
+7/15/2026 19:45:25,7/15/2026 19:45:25,USR-001,Usafi:Jumla,Sabuni : UNGA,Niceone-180g,40,"17,500",438,Tabasam
+7/15/2026 19:45:28,7/15/2026 19:45:28,USR-001,Usafi:Jumla,Sabuni : UNGA,Doffi-160g,40,"17,500",438,Tabasam
+7/15/2026 19:45:31,7/15/2026 19:45:31,USR-001,Usafi:Jumla,Sabuni : UNGA,Niceone-400g,30,"26,500",883,Tabasam
+7/17/2026 15:10:37,7/17/2026 15:10:37,USR-002,Vinywaji,Bia,Safari:(Lg),20,"36,000","1,800",🤷‍♂️
+7/17/2026 15:10:41,7/17/2026 15:10:41,USR-002,Vinywaji,Bia,Serengeti:(Lg),20,"36,000","1,800",🤷‍♂️
+7/17/2026 15:10:44,7/17/2026 15:10:44,USR-002,Vitamu,Pipi/Bigijii,Pipi:Bigijii@50,200,"7,000",35,musa ma pipi
+7/17/2026 15:10:48,7/17/2026 15:10:48,USR-002,Vitamu,Pipi/Bigijii,Pipi:Bigijii@50,50,"2,000",40,musa ma pipi
+7/17/2026 21:42:07,7/17/2026 21:42:07,USR-002,Afya,Dawa Mbu : Koili,Mosquito :COIL,50,"6,500",130,musa ma pipi
+7/19/2026 12:05:37,7/19/2026 12:05:37,USR-001,Viungo,Pakiti : Majani Chai,Chai-2g,60,"2,000",33,Mama-ANinta
+7/19/2026 12:05:41,7/19/2026 12:05:41,USR-001,Vinywaji,Maji,Uhai(W)-1.6L,5,"17,000","3,400",Mama-Anita
+7/19/2026 12:05:44,7/19/2026 12:05:44,USR-001,Vinywaji,Spirit,Jobo-200ml,12,"21,500","1,792",Mama-Anita
+7/19/2026 12:05:48,7/19/2026 12:05:48,USR-001,Vinywaji,Spirit,Konyagi(S)- 200ml,6,"24,000","4,000",Mama-Anita
+7/19/2026 12:05:50,7/19/2026 12:05:50,USR-001,Sigara & RIZLA,Sigara & RIZLA,RIZLA,10,"7,000",700,Mama-Anita
+7/19/2026 12:05:54,7/19/2026 12:05:54,USR-001,Nafaka,Karanga,Karanga,5,"21,000","4,200",Unknown
+7/19/2026 12:05:57,7/19/2026 12:05:57,USR-001,Vinywaji,Juisi,U-Fresh:Bottled-Mango-200ml,24,"6,000",250,Unknown
+7/19/2026 12:06:00,7/19/2026 12:06:00,USR-001,Nafaka,Mchele,Mchele@1850,15,"27,750","1,850",Rama
+7/19/2026 12:06:04,7/19/2026 12:06:04,USR-001,Jikoni,Kiberiti : NJITI,Kiberiti,200,"9,000",45,Ngosha-Bunju
+7/19/2026 12:06:06,7/19/2026 12:06:06,USR-001,Vinywaji,Soda,Azam-Malt-300ml,24,"12,000",500,Ngosha
+7/19/2026 12:06:09,7/19/2026 12:06:09,USR-001,Jikoni,MSHUMAA,Mshumaa,24,"8,000",333,Ngosha-Bunju
+7/19/2026 12:06:13,7/19/2026 12:06:13,USR-001,Usafi:Jumla,Sabuni-(Mche),Jamaa(BS),12,"7,000",583,Ngosha-Bunju
+7/19/2026 12:06:16,7/19/2026 12:06:16,USR-001,Usafi:Jumla,Sabuni-(Mche),Whitewash(BS),12,"7,000",583,Ngosha-Bunju
+7/19/2026 12:06:20,7/19/2026 12:06:20,USR-001,Sigara & RIZLA,Sigara & RIZLA,Portsman,40,"9,000",225,Ngosha-Bunju
+7/19/2026 12:06:22,7/19/2026 12:06:22,USR-001,Usafi:Binafsi,Dawa/Meno,Whitedent (F)-20g,12,"6,500",542,Ngosha
+7/19/2026 12:06:25,7/19/2026 12:06:25,USR-001,Sigara & RIZLA,Sigara & RIZLA,Embassy,20,"6,300",315,Ngosha-Bunju
+7/19/2026 12:06:28,7/19/2026 12:06:28,USR-001,Sigara & RIZLA,Sigara & RIZLA,Winston(K),40,"5,200",130,Ngosha-Bunju
+7/19/2026 12:06:31,7/19/2026 12:06:31,USR-001,Sigara & RIZLA,Sigara & RIZLA,Master(R),40,"4,800",120,Ngosha-Bunju
+7/19/2026 12:06:34,7/19/2026 12:06:34,USR-001,Sigara & RIZLA,Sigara & RIZLA,Master(R),40,"2,400",60,Ngosha-Bunju
+7/19/2026 12:06:37,7/19/2026 12:06:37,USR-001,Vinywaji,Spirit,Smart Gin-200ml,45,"82,500","1,833",Ngosha-Bunju
+7/19/2026 12:06:40,7/19/2026 12:06:40,USR-001,Vinywaji,Maji,Uhai(W)-1L,60,"26,000",433,Ngosha-Bunju
+7/19/2026 12:06:43,7/19/2026 12:06:43,USR-001,Vinywaji,Soda,Azam-Cola-300ml,72,"31,500",438,Ngosha-Bunju
+7/19/2026 12:06:46,7/19/2026 12:06:46,USR-001,Usafi:Jumla,Tishu,Viva(T),20,"22,000","1,100",Ngosha-Bunju
+7/19/2026 12:06:49,7/19/2026 12:06:49,USR-001,Vinywaji,E-Drink,Azam:(E)-300ML,24,"12,500",521,Ngosha-Bunju
+7/19/2026 12:06:52,7/19/2026 12:06:52,USR-001,Vinywaji,Soda,Pepsi : 600ml,24,"19,800",825,Ngosha-Bunju
+7/19/2026 12:06:56,7/19/2026 12:06:56,USR-001,Vinywaji,Soda,Fanta-Orange-600ml,12,"10,000",833,Ngosha
+7/19/2026 12:06:59,7/19/2026 12:06:59,USR-001,Vinywaji,Juisi,Jambo:Cocopine-300ml,48,"21,200",442,Ngosha-Bunju
+7/19/2026 12:07:03,7/19/2026 12:07:03,USR-001,Vinywaji,Maji,Uhai(W)-13L,5,"18,500","3,700",Ngosha-Bunju
+7/19/2026 12:07:06,7/19/2026 12:07:06,USR-001,Usafi:Binafsi,Mafuta : Nazi,Haswa -Nazi-70ML,24,"17,000",708,Ngosha-Bunju
+7/19/2026 12:07:09,7/19/2026 12:07:09,USR-001,Vinywaji,Juisi,Jambo:Bolibo-300ml,36,"15,900",442,Ngosha-Bunju
+7/19/2026 12:07:12,7/19/2026 12:07:12,USR-001,Usafi:Mtoto,Pampasi/Diaper,Softcare(P)-(9-15),40,"14,000",350,Ngosha-Bunju
+7/20/2026 16:05:18,7/20/2026 16:05:18,USR-002,Vitamu,Pipi/Bigijii,Pipi:Bigijii@100,100,"7,000",70,joni
+7/20/2026 16:05:23,7/20/2026 16:05:23,USR-002,Vinywaji,Soda,Azam-Punch-300ml,12,"5,500",458,pendo shop
+7/20/2026 16:05:30,7/20/2026 16:05:30,USR-002,Gesi:Mtungi,Gesi:Mtungi,Oryx(S),1,"24,500","24,500",wema
+7/20/2026 16:05:36,7/20/2026 16:05:36,USR-002,Gesi:Mtungi,Gesi:Mtungi,Taifa(S),1,"23,500","23,500",taifa
+7/20/2026 16:05:40,7/20/2026 16:05:40,USR-002,Vinywaji,Maji,Uhai(W)-1.6L,36,"20,400",567,mama-anita
+7/21/2026 19:57:56,7/21/2026 19:57:56,USR-002,Usafi:Binafsi,Mafuta : Gliserini,Banister-Pure-100ML,12,"10,000",833,mama-anita
+7/21/2026 19:58:01,7/21/2026 19:58:01,USR-002,Usafi:Binafsi,Mafuta : Nazi,Haswa -Nazi-70ML,24,"16,000",667,mama-anita

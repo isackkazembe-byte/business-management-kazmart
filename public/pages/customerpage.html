@@ -1,0 +1,1414 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="UTF-8"/>
+  <title>KazMart - Customer View</title>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    :root{
+      --teal:#117594;
+      --teal-dark:#0D5A70;
+      --teal-light:#C9E8F3;
+      --teal-faint:#EAF4F9;
+      --navy:#0B5394;
+      --white:#FFFFFF;
+      --gray:#595959;
+      --gray-light:#F4F8FA;
+      --gray-border:#DDE6EA;
+      --red:#CC0000;
+      --red-light:#FFEEEE;
+      --green:#1E7B34;
+      --green-light:#EAF5EC;
+      --amber:#B45309;
+      --amber-light:#FEF3C7;
+      --gold:#D4AF37;
+      --gold-light:#FFF8E7;
+      --gold-gradient:linear-gradient(135deg, #D4AF37 0%, #F5D76E 50%, #D4AF37 100%);
+      --font:"Century Gothic","Trebuchet MS",Arial,sans-serif;
+      --mono:"Courier New",Courier,monospace;
+      --radius:20px;
+    }
+    
+    body {
+      font-family: var(--font);
+      background: linear-gradient(160deg, #0B3B4A 0%, #0D5A70 40%, #1A8AAC 100%);
+      color: var(--white);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      margin: 0;
+      overflow: hidden;
+    }
+    
+    body::before {
+      content: '';
+      position: fixed;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: 
+        radial-gradient(ellipse at 20% 50%, rgba(17,117,148,0.15) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 50%, rgba(212,175,55,0.08) 0%, transparent 50%);
+      animation: bgFloat 20s ease-in-out infinite;
+      z-index: 0;
+    }
+    
+    @keyframes bgFloat {
+      0%, 100% { transform: translate(0, 0) rotate(0deg); }
+      33% { transform: translate(2%, -2%) rotate(1deg); }
+      66% { transform: translate(-2%, 2%) rotate(-1deg); }
+    }
+    
+    .customer-view {
+      width: 100%;
+      max-width: 960px;
+      background: rgba(255,255,255,0.06);
+      backdrop-filter: blur(24px) saturate(1.2);
+      border-radius: var(--radius);
+      padding: 28px 32px 24px;
+      box-shadow: 
+        0 30px 80px rgba(0,0,0,0.5),
+        inset 0 1px 0 rgba(255,255,255,0.12),
+        0 0 0 1px rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.08);
+      position: relative;
+      z-index: 1;
+      min-height: 92vh;
+      transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    
+    .customer-view::before {
+      content: '';
+      position: absolute;
+      top: -30%;
+      right: -20%;
+      width: 70%;
+      height: 70%;
+      background: radial-gradient(circle, rgba(17,117,148,0.12) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+    
+    .customer-view::after {
+      content: '';
+      position: absolute;
+      bottom: -30%;
+      left: -20%;
+      width: 60%;
+      height: 60%;
+      background: radial-gradient(circle, rgba(212,175,55,0.06) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+    
+    .cv-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding-bottom: 14px;
+      border-bottom: 2px solid rgba(255,255,255,0.08);
+      position: relative;
+      z-index: 1;
+    }
+    
+    .cv-logo {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    
+    .cv-logo-icon {
+      width: 50px;
+      height: 50px;
+      background: var(--gold-gradient);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      font-weight: 900;
+      color: #0B3B4A;
+      box-shadow: 0 4px 20px rgba(212,175,55,0.3);
+      border: 1px solid rgba(255,255,255,0.15);
+      position: relative;
+    }
+    
+    .cv-logo-icon::after {
+      content: '';
+      position: absolute;
+      inset: -3px;
+      border-radius: 17px;
+      background: var(--gold-gradient);
+      opacity: 0.3;
+      filter: blur(8px);
+      z-index: -1;
+    }
+    
+    .cv-logo-text {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      color: #fff;
+      text-shadow: 0 2px 20px rgba(0,0,0,0.2);
+    }
+    
+    .cv-logo-text span {
+      background: var(--gold-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .cv-tagline {
+      font-size: 9px;
+      color: rgba(255,255,255,0.5);
+      letter-spacing: 3px;
+      font-weight: 400;
+      margin-top: 2px;
+      text-transform: uppercase;
+    }
+    
+    .cv-clock {
+      font-family: var(--mono);
+      font-size: 18px;
+      color: rgba(255,255,255,0.8);
+      background: rgba(255,255,255,0.06);
+      padding: 6px 16px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.08);
+      letter-spacing: 1px;
+    }
+    
+    .cv-customer {
+      background: rgba(255,255,255,0.06);
+      border-radius: 14px;
+      padding: 16px 20px;
+      margin-bottom: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border: 1px solid rgba(255,255,255,0.08);
+      position: relative;
+      z-index: 1;
+      backdrop-filter: blur(10px);
+      transition: all 0.3s ease;
+    }
+    
+    .cv-customer:hover {
+      background: rgba(255,255,255,0.09);
+      border-color: rgba(255,255,255,0.12);
+    }
+    
+    .cv-customer-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    
+    .cv-customer-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: var(--gold-gradient);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      font-weight: 700;
+      color: #0B3B4A;
+      box-shadow: 0 2px 12px rgba(212,175,55,0.2);
+    }
+    
+    .cv-customer-name {
+      font-size: 20px;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: 0.5px;
+    }
+    
+    .cv-customer-name .guest {
+      color: rgba(255,255,255,0.4);
+      font-weight: 400;
+    }
+    
+    .cv-customer-card {
+      font-size: 11px;
+      color: rgba(255,255,255,0.4);
+      font-family: var(--mono);
+      background: rgba(255,255,255,0.04);
+      padding: 2px 10px;
+      border-radius: 6px;
+      letter-spacing: 0.5px;
+      margin-top: 2px;
+    }
+    
+    .cv-customer-points {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    
+    .cv-points-box {
+      text-align: center;
+      background: rgba(255,255,255,0.04);
+      padding: 4px 14px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.06);
+      min-width: 60px;
+      transition: all 0.3s ease;
+    }
+    
+    .cv-points-box:hover {
+      background: rgba(255,255,255,0.08);
+      transform: translateY(-2px);
+    }
+    
+    .cv-points-box .label {
+      font-size: 8px;
+      color: rgba(255,255,255,0.5);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      font-weight: 600;
+    }
+    
+    .cv-points-box .value {
+      font-size: 24px;
+      font-weight: 900;
+      color: #D4AF37;
+      line-height: 1.2;
+      margin-top: 2px;
+    }
+    
+    .cv-points-box .value.earned {
+      color: #4CAF50;
+    }
+    
+    .cv-points-box .value.redeemed {
+      color: #FF9800;
+    }
+    
+    .cv-points-value {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255,255,255,0.04);
+      padding: 4px 12px;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.04);
+    }
+    
+    .cv-points-value .label {
+      font-size: 8px;
+      color: rgba(255,255,255,0.4);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .cv-points-value .value {
+      font-size: 18px;
+      font-weight: 800;
+      color: #D4AF37;
+      font-family: var(--mono);
+    }
+    
+    .cv-info-bar {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+      z-index: 1;
+      position: relative;
+    }
+    
+    .cv-info-tag {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255,255,255,0.04);
+      padding: 4px 14px;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.04);
+      font-size: 12px;
+      color: rgba(255,255,255,0.6);
+      transition: all 0.3s ease;
+    }
+    
+    .cv-info-tag:hover {
+      background: rgba(255,255,255,0.08);
+      color: rgba(255,255,255,0.9);
+    }
+    
+    .cv-info-tag .tag-label {
+      color: rgba(255,255,255,0.3);
+      font-weight: 400;
+    }
+    
+    .cv-info-tag .tag-value {
+      font-weight: 600;
+      color: #fff;
+    }
+    
+    .cv-info-tag .tag-value.debt-warning {
+      color: #FF6B6B;
+      font-weight: 800;
+      font-size: 15px;
+    }
+    
+    .cv-info-tag .tag-value.debt-clear {
+      color: #4CAF50;
+      font-weight: 800;
+      font-size: 15px;
+    }
+    
+    .cv-cart-section {
+      flex: 1;
+      position: relative;
+      z-index: 1;
+      min-height: 200px;
+    }
+    
+    .cv-cart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    
+    .cv-cart-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.5);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+    
+    .cv-cart-count {
+      font-size: 11px;
+      color: rgba(255,255,255,0.4);
+      background: rgba(255,255,255,0.04);
+      padding: 2px 12px;
+      border-radius: 10px;
+    }
+    
+    .cv-cart-items {
+      background: rgba(255,255,255,0.03);
+      border-radius: 14px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.05);
+      max-height: 280px;
+      overflow-y: auto;
+    }
+    
+    .cv-cart-items::-webkit-scrollbar {
+      width: 3px;
+    }
+    
+    .cv-cart-items::-webkit-scrollbar-track {
+      background: rgba(255,255,255,0.04);
+    }
+    
+    .cv-cart-items::-webkit-scrollbar-thumb {
+      background: rgba(212,175,55,0.3);
+      border-radius: 10px;
+    }
+    
+    .cv-cart-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.03);
+      transition: all 0.3s ease;
+    }
+    
+    .cv-cart-item:last-child {
+      border-bottom: none;
+    }
+    
+    .cv-cart-item:hover {
+      background: rgba(255,255,255,0.04);
+    }
+    
+    .cv-item-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .cv-item-qty-badge {
+      background: rgba(212,175,55,0.15);
+      color: var(--gold);
+      font-weight: 700;
+      font-size: 13px;
+      min-width: 28px;
+      text-align: center;
+      padding: 2px 6px;
+      border-radius: 6px;
+      border: 1px solid rgba(212,175,55,0.1);
+    }
+    
+    .cv-item-name {
+      font-size: 18px;
+      font-weight: 700;
+      color: #FFFFFF;
+    }
+    
+    .cv-item-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .cv-item-discount {
+      font-size: 12px;
+      color: #FF6B6B;
+      font-weight: 600;
+    }
+    
+    .cv-item-price {
+      font-size: 20px;
+      font-weight: 800;
+      color: #FFFFFF;
+      font-family: var(--mono);
+    }
+    
+    .cv-totals {
+      margin-top: 14px;
+      background: rgba(255,255,255,0.04);
+      border-radius: 14px;
+      padding: 14px 20px;
+      border: 1px solid rgba(255,255,255,0.06);
+      position: relative;
+      z-index: 1;
+      backdrop-filter: blur(10px);
+    }
+    
+    .cv-total-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 4px 0;
+      font-size: 14px;
+      color: rgba(255,255,255,0.6);
+    }
+    
+    .cv-total-row .label {
+      font-weight: 600;
+      color: rgba(255,255,255,0.8);
+      font-size: 15px;
+    }
+    
+    .cv-total-row .amount {
+      font-weight: 800;
+      color: #FFFFFF;
+      font-family: var(--mono);
+      font-size: 18px;
+    }
+    
+    .cv-total-row.grand {
+      border-top: 2px solid rgba(255,255,255,0.08);
+      margin-top: 6px;
+      padding-top: 12px;
+      font-size: 20px;
+    }
+    
+    .cv-total-row.grand .label {
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: 0.5px;
+    }
+    
+    .cv-total-row.grand .amount {
+      font-weight: 900;
+      color: #FFFFFF;
+      font-size: 40px;
+    }
+    
+    .cv-total-row .discount-amount {
+      color: #FF6B6B;
+      font-weight: 800;
+      font-size: 18px;
+    }
+    
+    .cv-total-row .loyalty-amount {
+      color: #FF9800;
+      font-weight: 800;
+      font-size: 18px;
+    }
+    
+    .cv-trends {
+      margin-top: 14px;
+      background: rgba(255,255,255,0.03);
+      border-radius: 14px;
+      padding: 12px 16px;
+      border: 1px solid rgba(255,255,255,0.04);
+      position: relative;
+      z-index: 1;
+    }
+    
+    .cv-trends-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.3);
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      margin-bottom: 8px;
+    }
+    
+    .cv-trend-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 4px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.02);
+    }
+    
+    .cv-trend-item:last-child {
+      border-bottom: none;
+    }
+    
+    .cv-trend-rank {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--gold);
+      min-width: 20px;
+    }
+    
+    .cv-trend-name {
+      font-size: 13px;
+      font-weight: 500;
+      color: rgba(255,255,255,0.7);
+      flex: 1;
+      margin-left: 8px;
+    }
+    
+    .cv-trend-qty {
+      font-size: 12px;
+      color: rgba(255,255,255,0.3);
+      font-family: var(--mono);
+    }
+    
+    .cv-footer {
+      margin-top: 14px;
+      text-align: center;
+      padding-top: 12px;
+      border-top: 1px solid rgba(255,255,255,0.04);
+      position: relative;
+      z-index: 1;
+    }
+    
+    .cv-footer .thankyou {
+      font-size: 16px;
+      font-weight: 300;
+      color: rgba(255,255,255,0.4);
+      letter-spacing: 1px;
+    }
+    
+    .cv-footer .thankyou strong {
+      background: var(--gold-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-weight: 600;
+    }
+    
+    .cv-footer .thankyou .emoji {
+      font-size: 18px;
+      -webkit-text-fill-color: initial;
+    }
+    
+    .cv-empty {
+      text-align: center;
+      padding: 40px 20px;
+      color: rgba(255,255,255,0.15);
+    }
+    
+    .cv-empty .icon {
+      font-size: 48px;
+      margin-bottom: 12px;
+      opacity: 0.3;
+    }
+    
+    .cv-empty .text {
+      font-size: 15px;
+      font-weight: 300;
+      letter-spacing: 1px;
+      color: rgba(255,255,255,0.2);
+    }
+    
+    .cv-empty .subtext {
+      font-size: 11px;
+      color: rgba(255,255,255,0.08);
+      margin-top: 4px;
+    }
+    
+    @keyframes saleFlash {
+      0% { box-shadow: 0 0 0 rgba(212,175,55,0); }
+      50% { box-shadow: 0 0 80px rgba(212,175,55,0.2), 0 30px 80px rgba(0,0,0,0.5); }
+      100% { box-shadow: 0 30px 80px rgba(0,0,0,0.5); }
+    }
+    
+    .customer-view.sale-complete {
+      animation: saleFlash 1.5s ease-out;
+    }
+    
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(15px) scale(0.98);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+    
+    .customer-view {
+      animation: fadeInUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    }
+    
+    .cv-cart-item {
+      animation: fadeInUp 0.25s ease-out both;
+    }
+    
+    .cv-cart-item:nth-child(1) { animation-delay: 0.03s; }
+    .cv-cart-item:nth-child(2) { animation-delay: 0.06s; }
+    .cv-cart-item:nth-child(3) { animation-delay: 0.09s; }
+    .cv-cart-item:nth-child(4) { animation-delay: 0.12s; }
+    .cv-cart-item:nth-child(5) { animation-delay: 0.15s; }
+    .cv-cart-item:nth-child(6) { animation-delay: 0.18s; }
+    .cv-cart-item:nth-child(7) { animation-delay: 0.21s; }
+    .cv-cart-item:nth-child(8) { animation-delay: 0.24s; }
+    .cv-cart-item:nth-child(9) { animation-delay: 0.27s; }
+    .cv-cart-item:nth-child(10) { animation-delay: 0.30s; }
+    
+    @media (max-width: 768px) {
+      .customer-view {
+        padding: 16px 18px 14px;
+        border-radius: 16px;
+        min-height: 95vh;
+        max-width: 100%;
+      }
+      
+      .cv-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+      }
+      
+      .cv-customer {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 12px 16px;
+      }
+      
+      .cv-customer-points {
+        flex-wrap: wrap;
+        width: 100%;
+        justify-content: space-between;
+      }
+      
+      .cv-points-box {
+        min-width: 50px;
+        padding: 4px 10px;
+      }
+      
+      .cv-points-box .value {
+        font-size: 17px;
+      }
+      
+      .cv-customer-left {
+        width: 100%;
+      }
+      
+      .cv-info-bar {
+        gap: 8px;
+      }
+      
+      .cv-info-tag {
+        font-size: 10px;
+        padding: 3px 10px;
+      }
+      
+      .cv-item-name {
+        font-size: 14px;
+      }
+      
+      .cv-item-price {
+        font-size: 14px;
+      }
+      
+      .cv-total-row.grand {
+        font-size: 16px;
+      }
+      
+      .cv-total-row.grand .amount {
+        font-size: 20px;
+      }
+      
+      .cv-logo-text {
+        font-size: 18px;
+      }
+      
+      .cv-clock {
+        font-size: 14px;
+        padding: 4px 12px;
+      }
+      
+      .cv-cart-items {
+        max-height: 180px;
+      }
+      
+      .cv-trend-item {
+        font-size: 12px;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .customer-view {
+        padding: 12px 14px 10px;
+        border-radius: 12px;
+      }
+      
+      .cv-customer-points {
+        gap: 6px;
+      }
+      
+      .cv-points-box {
+        min-width: 40px;
+        padding: 3px 8px;
+      }
+      
+      .cv-points-box .value {
+        font-size: 14px;
+      }
+      
+      .cv-item-left {
+        gap: 6px;
+      }
+      
+      .cv-item-name {
+        font-size: 12px;
+      }
+      
+      .cv-item-price {
+        font-size: 12px;
+      }
+      
+      .cv-item-qty-badge {
+        min-width: 20px;
+        font-size: 11px;
+      }
+      
+      .cv-total-row.grand .amount {
+        font-size: 16px;
+      }
+      
+      .cv-points-value .value {
+        font-size: 11px;
+      }
+      
+      .cv-info-tag {
+        font-size: 9px;
+        padding: 2px 8px;
+      }
+    }
+
+    /* ─── PROCESSING OVERLAY (3D Animated) ─────────────────────── */
+.cv-processing-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(16px) saturate(1.5);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  flex-direction: column;
+  animation: fadeIn 0.5s ease;
+}
+
+.cv-processing-overlay.show {
+  display: flex;
+}
+
+/* The animated ring spinner */
+.cv-processing-spinner {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  position: relative;
+  margin-bottom: 30px;
+  animation: spinGlow 1.5s linear infinite;
+}
+
+.cv-processing-spinner::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 4px solid rgba(212, 175, 55, 0.15);
+  border-top: 4px solid #D4AF37;
+  border-right: 4px solid #D4AF37;
+  animation: spin 1.2s cubic-bezier(0.68, -0.55, 0.27, 1.55) infinite;
+  box-shadow: 0 0 30px rgba(212, 175, 55, 0.15);
+}
+
+.cv-processing-spinner::after {
+  content: '';
+  position: absolute;
+  inset: 12px;
+  border-radius: 50%;
+  border: 3px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 3px solid #FFD700;
+  animation: spin 0.8s linear infinite reverse;
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.05);
+}
+
+/* Pulsing dots (3 dots) */
+.cv-processing-dots {
+  display: flex;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.cv-processing-dots span {
+  display: block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #D4AF37;
+  animation: dotPulse 1.4s ease-in-out infinite both;
+}
+
+.cv-processing-dots span:nth-child(1) { animation-delay: 0s; }
+.cv-processing-dots span:nth-child(2) { animation-delay: 0.2s; }
+.cv-processing-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes dotPulse {
+  0%, 80%, 100% { transform: scale(0.4); opacity: 0.3; }
+  40% { transform: scale(1); opacity: 1; }
+}
+
+.cv-processing-title {
+  font-size: 38px;
+  font-weight: 900;
+  color: #FFFFFF;
+  letter-spacing: 2px;
+  text-shadow: 0 2px 30px rgba(212, 175, 55, 0.15);
+  margin-top: 8px;
+  background: linear-gradient(135deg, #fff 0%, #D4AF37 50%, #fff 100%);
+  -webkit-background-clip: text;
+  background-clip: text;              /* 👈 add this line */
+  -webkit-text-fill-color: transparent;
+  background-size: 200% 200%;
+  animation: shimmerText 2s ease-in-out infinite;
+}
+
+@keyframes shimmerText {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.cv-processing-sub {
+  font-size: 18px;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.5);
+  letter-spacing: 4px;
+  margin-top: 4px;
+}
+
+@keyframes spinGlow {
+  0% { transform: rotate(0deg) scale(1); }
+  50% { transform: rotate(180deg) scale(1.05); }
+  100% { transform: rotate(360deg) scale(1); }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ─── COMPLETION OVERLAY (3D Pop) ──────────────────────────── */
+.cv-complete-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(20px) saturate(1.2);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 9998;
+  flex-direction: column;
+  animation: fadeIn 0.5s ease;
+}
+
+.cv-complete-overlay.show {
+  display: flex;
+}
+
+.cv-complete-content {
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(10px);
+  border-radius: 32px;
+  padding: 50px 60px;
+  text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transform: scale(0.8) translateY(20px);
+  animation: popIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes popIn {
+  0% { opacity: 0; transform: scale(0.8) translateY(20px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.cv-complete-icon {
+  font-size: 80px;
+  margin-bottom: 8px;
+  display: inline-block;
+  animation: bounceIcon 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s both;
+  filter: drop-shadow(0 8px 30px rgba(212, 175, 55, 0.3));
+}
+
+@keyframes bounceIcon {
+  0% { transform: scale(0); opacity: 0; }
+  60% { transform: scale(1.2); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.cv-complete-title {
+  font-size: 48px;
+  font-weight: 900;
+  background: linear-gradient(135deg, #D4AF37 0%, #FFD700 50%, #D4AF37 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: 2px;
+  margin-bottom: 4px;
+  filter: drop-shadow(0 2px 20px rgba(212, 175, 55, 0.2));
+}
+
+.cv-complete-sub {
+  font-size: 22px;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.6);
+  letter-spacing: 3px;
+}
+
+/* Glow effect around the whole overlay */
+.cv-complete-overlay::before {
+  content: '';
+  position: absolute;
+  width: 50%;
+  height: 50%;
+  top: 25%;
+  left: 25%;
+  background: radial-gradient(circle, rgba(212, 175, 55, 0.08) 0%, transparent 70%);
+  pointer-events: none;
+  animation: pulseGlow 2s ease-in-out infinite;
+}
+
+@keyframes pulseGlow {
+  0%, 100% { transform: scale(1); opacity: 0.5; }
+  50% { transform: scale(1.2); opacity: 1; }
+}
+  </style>
+</head>
+<body>
+  
+  <div class="customer-view" id="customerView">
+    
+    <div class="cv-header">
+      <div class="cv-logo">
+        <div class="cv-logo-icon">K</div>
+        <div>
+          <div class="cv-logo-text">Kaz<span>Mart</span></div>
+          <div class="cv-tagline">BEYOND THE EXPECTED</div>
+        </div>
+      </div>
+      <div class="cv-clock" id="cvClock">--:--:--</div>
+    </div>
+    
+    <div class="cv-customer" id="cvCustomer">
+      <div class="cv-customer-left">
+        <div class="cv-customer-avatar" id="cvAvatar">👤</div>
+        <div>
+          <div class="cv-customer-name" id="cvCustomerName">Guest</div>
+          <div class="cv-customer-card" id="cvCustomerCard">KM-0000</div>
+        </div>
+      </div>
+      <div class="cv-customer-points">
+        <div class="cv-points-box">
+          <div class="label">Available</div>
+          <div class="value" id="cvPointsAvailable">0</div>
+        </div>
+        <div class="cv-points-box">
+          <div class="label">Redeemed</div>
+          <div class="value redeemed" id="cvPointsRedeemed">0</div>
+        </div>
+        <div class="cv-points-box">
+          <div class="label">Earned</div>
+          <div class="value earned" id="cvPointsEarned">0</div>
+        </div>
+        <div class="cv-points-value">
+          <span class="label">Points Value</span>
+          <span class="value" id="cvPointsValue">TZS 0</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="cv-info-bar">
+      <div class="cv-info-tag">
+        <span class="tag-label">👤 Mhudumu:</span>
+        <span class="tag-value" id="cvCashier">—</span>
+      </div>
+      <div class="cv-info-tag">
+        <span class="tag-label">💰 Deni:</span>
+        <span class="tag-value" id="cvDebt">TZS 0</span>
+      </div>
+      <div class="cv-info-tag">
+        <span class="tag-label">📅 Tarehe :Manunuzi yaliyopita:</span>
+        <span class="tag-value" id="cvLastVisit">—</span>
+      </div>
+    </div>
+    
+    <div class="cv-cart-section">
+      <div class="cv-cart-header">
+        <div class="cv-cart-title">🛒 BIDHAA</div>
+        <div class="cv-cart-count" id="cvCartCount">0 items</div>
+      </div>
+      <div class="cv-cart-items" id="cvCartItems">
+        <div class="cv-empty">
+          <div class="icon">🛍️</div>
+          <div class="text">HAKUNA BIDHAA KATKA KAPU!</div>
+          <div class="subtext"></div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="cv-totals" id="cvTotals" style="display:none;">
+      <div class="cv-total-row">
+        <span class="label">JUMLA</span>
+        <span class="amount" id="cvSubtotal">TZS 0</span>
+      </div>
+      <div class="cv-total-row" id="cvDiscountRow" style="display:none;">
+        <span class="label">PUNGUZO</span>
+        <span class="amount discount-amount" id="cvDiscount">- TZS 0</span>
+      </div>
+      <div class="cv-total-row" id="cvLoyaltyRow" style="display:none;">
+        <span class="label">Loyalty</span>
+        <span class="amount loyalty-amount" id="cvLoyalty">- TZS 0</span>
+      </div>
+      <div class="cv-total-row grand">
+        <span class="label">JUMLA KUU : LIPIA</span>
+        <span class="amount" id="cvTotal">TZS 0</span>
+      </div>
+    </div>
+    
+    <div class="cv-trends" id="cvTrends" style="display:none;">
+      <div class="cv-trends-title">📊 Your Top Purchases</div>
+      <div id="cvTrendItems">
+        <div class="cv-empty" style="padding:16px;">
+          <div class="text" style="font-size:12px; color:rgba(255,255,255,0.15);">No purchase history yet</div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="cv-footer">
+      <div class="thankyou">
+        <span class="emoji">🙏</span> Thank you for shopping with <strong>KazMart</strong> <span class="emoji">❤️</span>
+      </div>
+    </div>
+    
+  </div>
+  
+  <script>
+    function updateClock() {
+      var now = new Date();
+      var h = String(now.getHours()).padStart(2, '0');
+      var m = String(now.getMinutes()).padStart(2, '0');
+      var s = String(now.getSeconds()).padStart(2, '0');
+      document.getElementById('cvClock').textContent = h + ':' + m + ':' + s;
+    }
+    updateClock();
+    setInterval(updateClock, 1000);
+    
+    function fmt(n) {
+      return 'TZS ' + Number(n || 0).toLocaleString('en-TZ', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+    }
+    
+    function fmtDate(d) {
+      if (!d) return '—';
+      try {
+        var date = new Date(d);
+        return date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+      } catch(e) {
+        return d;
+      }
+    }
+    
+    var channel;
+    try {
+      channel = new BroadcastChannel('kazmart_pos');
+    } catch(e) {
+      channel = null;
+    }
+    
+    if (channel) {
+      channel.addEventListener('message', function(event) {
+        var data = event.data;
+        console.log('📥 Customer View received:', data);
+        
+        if (data.type === 'PROCESSING_START') {
+          showProcessing();
+        }
+        
+        if (data.type === 'CART_UPDATE') {
+          hideProcessing();
+          updateCustomerView(data);
+        }
+        
+        if (data.type === 'SALE_COMPLETE') {
+          showCompleteSale();
+          updateCustomerView({
+            items: [],
+            subtotal: 0,
+            total: 0,
+            discount: 0,
+            loyaltyUsed: 0,
+            customer: 'Guest',
+            cardNumber: 'KM-0000',
+            pointsBalance: 0,
+            pointsRedeemed: 0,
+            pointsEarned: 0,
+            cashier: '—',
+            totalDebt: 0,
+            lastVisit: null,
+            topTrends: [],
+            saleComplete: true
+          });
+        }
+      });
+    }
+
+    function updateCustomerView(data) {
+      if (data && data.saleComplete === true) {
+        document.getElementById('cvCustomerName').textContent = 'Guest';
+        document.getElementById('cvCustomerName').className = 'cv-customer-name';
+        document.getElementById('cvAvatar').textContent = '👤';
+        document.getElementById('cvCustomerCard').textContent = 'KM-0000';
+        document.getElementById('cvPointsAvailable').textContent = '0';
+        document.getElementById('cvPointsRedeemed').textContent = '0';
+        document.getElementById('cvPointsEarned').textContent = '0';
+        document.getElementById('cvPointsValue').textContent = 'TZS 0';
+        document.getElementById('cvCashier').textContent = '—';
+        document.getElementById('cvDebt').textContent = '✓ Clear';
+        document.getElementById('cvDebt').className = 'tag-value debt-clear';
+        document.getElementById('cvLastVisit').textContent = '—';
+        document.getElementById('cvCartCount').textContent = '0 items';
+        document.getElementById('cvTotals').style.display = 'none';
+        document.getElementById('cvTrends').style.display = 'none';
+        
+        document.getElementById('cvCartItems').innerHTML = `
+          <div class="cv-empty">
+            <div class="icon">🛍️</div>
+            <div class="text">Your cart is empty</div>
+            <div class="subtext">Start shopping to see your items here</div>
+          </div>
+        `;
+        
+        document.querySelector('.cv-footer .thankyou').innerHTML = `
+          <span class="emoji">🙏</span> Thank you for shopping with <strong>KazMart</strong> <span class="emoji">❤️</span>
+        `;
+        
+        return;
+      }
+      
+      var nameEl = document.getElementById('cvCustomerName');
+      var avatarEl = document.getElementById('cvAvatar');
+      
+      if (data.customer && data.customer !== 'Guest') {
+        nameEl.textContent = data.customer;
+        avatarEl.textContent = data.customer.charAt(0).toUpperCase();
+      } else {
+        nameEl.textContent = 'Guest';
+        avatarEl.textContent = '👤';
+      }
+      
+      document.getElementById('cvCustomerCard').textContent = data.cardNumber || 'KM-0000';
+      document.getElementById('cvPointsAvailable').textContent = data.pointsBalance || 0;
+      document.getElementById('cvPointsRedeemed').textContent = data.pointsRedeemed || 0;
+      document.getElementById('cvPointsEarned').textContent = data.pointsEarned || 0;
+      
+      var pointsValue = (data.pointsBalance || 0);
+      document.getElementById('cvPointsValue').textContent = fmt(pointsValue);
+      
+      document.getElementById('cvCashier').textContent = data.cashier || '—';
+      
+      var debtEl = document.getElementById('cvDebt');
+      var debtAmount = data.totalDebt || 0;
+      if (debtAmount > 0) {
+        debtEl.textContent = fmt(debtAmount);
+        debtEl.className = 'tag-value debt-warning';
+      } else {
+        debtEl.textContent = '✓ Clear';
+        debtEl.className = 'tag-value debt-clear';
+      }
+      
+      document.getElementById('cvLastVisit').textContent = data.lastVisit ? fmtDate(data.lastVisit) : '—';
+      
+      var cartContainer = document.getElementById('cvCartItems');
+      var countEl = document.getElementById('cvCartCount');
+      var items = data.items || [];
+      
+      countEl.textContent = items.length + ' item' + (items.length !== 1 ? 's' : '');
+      
+      if (!items.length) {
+        cartContainer.innerHTML = `
+          <div class="cv-empty">
+            <div class="icon">🛍️</div>
+            <div class="text">Your cart is empty</div>
+            <div class="subtext">Start shopping to see your items here</div>
+          </div>
+        `;
+        document.getElementById('cvTotals').style.display = 'none';
+        document.getElementById('cvTrends').style.display = 'none';
+        return;
+      }
+      
+      cartContainer.innerHTML = items.map(function(item, i) {
+        var discountText = '';
+        if (item.discount && item.discount > 0) {
+          discountText = ' <span class="cv-item-discount">-' + fmt(item.discount) + '</span>';
+        }
+        var bundleTag = item.isBundle ? ' <span class="bundle-tag">Bundle</span>' : '';
+        
+        return `
+          <div class="cv-cart-item" style="animation-delay: ${i * 0.04}s">
+            <div class="cv-item-left">
+              <span class="cv-item-qty-badge">${item.qty}</span>
+              <span class="cv-item-name">${item.name}${bundleTag}</span>
+            </div>
+            <div class="cv-item-right">
+              ${discountText}
+              <span class="cv-item-price">${fmt(item.lineTotal)}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+      
+      document.getElementById('cvTotals').style.display = 'block';
+      document.getElementById('cvSubtotal').textContent = fmt(data.subtotal || 0);
+      
+      var discountRow = document.getElementById('cvDiscountRow');
+      if (data.discount && data.discount > 0) {
+        discountRow.style.display = 'flex';
+        document.getElementById('cvDiscount').textContent = '- ' + fmt(data.discount);
+      } else {
+        discountRow.style.display = 'none';
+      }
+      
+      var loyaltyRow = document.getElementById('cvLoyaltyRow');
+      if (data.loyaltyUsed && data.loyaltyUsed > 0) {
+        loyaltyRow.style.display = 'flex';
+        document.getElementById('cvLoyalty').textContent = '- ' + fmt(data.loyaltyUsed);
+      } else {
+        loyaltyRow.style.display = 'none';
+      }
+      
+      document.getElementById('cvTotal').textContent = fmt(data.total || 0);
+      
+      var trends = data.topTrends || [];
+      var trendsContainer = document.getElementById('cvTrendItems');
+      var trendsSection = document.getElementById('cvTrends');
+      
+      if (trends.length > 0) {
+        trendsSection.style.display = 'block';
+        trendsContainer.innerHTML = trends.map(function(t, i) {
+          var rankIcons = ['🥇', '🥈', '🥉'];
+          var icon = rankIcons[i] || '#' + (i + 1);
+          return `
+            <div class="cv-trend-item">
+              <span class="cv-trend-rank">${icon}</span>
+              <span class="cv-trend-name">${t.item}</span>
+              <span class="cv-trend-qty">${t.totalQty} purchased</span>
+            </div>
+          `;
+        }).join('');
+      } else {
+        trendsSection.style.display = 'block';
+        trendsContainer.innerHTML = `
+          <div class="cv-empty" style="padding:12px;">
+            <div class="text" style="font-size:12px; color:rgba(255,255,255,0.15);">No purchase history yet</div>
+          </div>
+        `;
+      }
+    }
+    
+    function showProcessing() {
+      var overlay = document.getElementById('processingOverlay');
+      overlay.classList.add('show');
+    }
+
+    function hideProcessing() {
+      var overlay = document.getElementById('processingOverlay');
+      overlay.classList.remove('show');
+    }
+
+    function showCompleteSale() {
+      hideProcessing();
+      
+      var overlay = document.getElementById('completeOverlay');
+      overlay.classList.add('show');
+      
+      setTimeout(function() {
+        overlay.classList.remove('show');
+      }, 4000);
+      
+      flashSaleComplete();
+    }
+
+    function flashSaleComplete() {
+      var view = document.getElementById('customerView');
+      view.classList.remove('sale-complete');
+      void view.offsetWidth;
+      view.classList.add('sale-complete');
+      setTimeout(function() {
+        view.classList.remove('sale-complete');
+      }, 2000);
+    }
+    
+    if (channel) {
+      channel.postMessage({ type: 'REQUEST_CART' });
+    }
+    
+    console.log('✅ Customer View Display Ready!');
+  </script>
+
+  <!-- PROCESSING OVERLAY -->
+<div class="cv-processing-overlay" id="processingOverlay">
+  <div class="cv-processing-spinner"></div>
+  <div class="cv-processing-title">Processing Payment</div>
+  <div class="cv-processing-sub">Tafadhali subiri</div>
+  <div class="cv-processing-dots">
+    <span></span><span></span><span></span>
+  </div>
+</div>
+
+<!-- COMPLETION OVERLAY -->
+<div class="cv-complete-overlay" id="completeOverlay">
+  <div class="cv-complete-content">
+    <div class="cv-complete-icon">✅</div>
+    <div class="cv-complete-title">Asante!</div>
+    <div class="cv-complete-sub">Karibu KazMart Tena ❤️</div>
+  </div>
+</div>
+
+</body>
+</html>

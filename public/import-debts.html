@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Import Debts</title>
+  <style>
+    body { font-family: 'Century Gothic', Arial, sans-serif; background: #f4f8fa; padding: 30px; }
+    .container { max-width: 900px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+    h1 { color: #0B5394; }
+    .drop-zone { border: 2px dashed #C9E8F3; border-radius: 8px; padding: 40px; text-align: center; cursor: pointer; transition: background 0.2s; }
+    .drop-zone:hover { background: #EAF4F9; }
+    .drop-zone.dragover { background: #C9E8F3; border-color: #117594; }
+    button { background: #117594; color: #fff; border: none; padding: 12px 30px; border-radius: 6px; font-size: 16px; font-weight: 700; cursor: pointer; margin-top: 10px; }
+    button:hover { background: #0D5A70; }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    .log { background: #f0f0f0; padding: 10px; border-radius: 6px; font-family: 'Courier New', monospace; font-size: 12px; max-height: 400px; overflow-y: auto; white-space: pre-wrap; margin-top: 10px; }
+    .success { color: #1E7B34; }
+    .error { color: #CC0000; }
+    .info { color: #0B5394; }
+    .warning { color: #B45309; }
+    #fileInput { display: none; }
+    label { display: block; margin: 10px 0; font-weight: 600; color: #0B5394; }
+    label input[type="checkbox"] { width: 18px; height: 18px; margin-right: 8px; cursor: pointer; }
+    .summary-card { background: #f8f9fa; padding: 12px; border-radius: 6px; margin-top: 10px; display: flex; gap: 20px; flex-wrap: wrap; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>💰 Import Debts</h1>
+    <p>Upload your <strong>DebtLog.csv</strong> file. Debts will be linked to customers using the <strong>LoyaltyCard</strong> column.</p>
+
+    <div class="drop-zone" id="dropZone">
+      <p style="font-size: 18px; color: #0B5394;">📂 Drag & drop your CSV file here</p>
+      <p style="color: #999;">or click to select</p>
+    </div>
+    <input type="file" id="fileInput" accept=".csv">
+
+    <label>
+      <input type="checkbox" id="updateCheckbox" checked>
+      ✅ Update existing debts (if skipped, duplicates will be added)
+    </label>
+
+    <button id="importBtn" disabled>🚀 Import Debts</button>
+    <div id="log" class="log">Ready to import...</div>
+  </div>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/12.15.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore-compat.js"></script>
+
+  <script>
+    // ─── Firebase Config ──────────────────────────────────────────
+    const firebaseConfig = {
+  apiKey: "AIzaSyA31nP6b9BuHvB4ffwQcKiHrs5vT7E0K4g",
+  authDomain: "biz-management-system-tz.firebaseapp.com",
+  projectId: "biz-management-system-tz",
+  storageBucket: "biz-management-system-tz.firebasestorage.app",
+  messagingSenderId: "246381480533",
+  appId: "1:246381480533:web:c6723c6277f61416e6e2dc"
+};
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    // ─── DOM ──────────────────────────────────────────────────────
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+    const importBtn = document.getElementById('importBtn');
+    const logEl = document.getElementById('log');
+    const updateCheckbox = document.getElementById('updateCheckbox');
+
+    let selectedFile = null;
+
+    function log(msg, type) {
+      const colors = { success: '#1E7B34', error: '#CC0000', info: '#0B5394', warning: '#B45309' };
+      const color = colors[type] || '#333';
+      logEl.innerHTML += `<span style="color:${color}">${msg}</span>\n`;
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    // ─── Drag & Drop ──────────────────────────────────────────────
+    dropZone.addEventListener('click', () => fileInput.click());
+    dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropZone.classList.remove('dragover');
+      if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files.length) handleFile(e.target.files[0]);
+    });
+
+    function handleFile(file) {
+      if (!file.name.endsWith('.csv')) {
+        log('❌ Please select a CSV file.', 'error');
+        return;
+      }
+      selectedFile = file;
+      importBtn.disabled = false;
+      log(`✅ Selected: ${file.name} (${(file.size/1024).toFixed(1)} KB)`, 'success');
+    }
+
+    // ─── Parse CSV ────────────────────────────────────────────────
+    function parseCSV(text) {
+      const lines = text.trim().split('\n');
+      const headers = lines[0].split(',').map(h => h.trim());
+      return lines.slice(1).map(line => {
+        const values = [];
+        let current = '';
+        let inQuotes = false;
+        for (const char of line) {
+          if (char === '"') { inQuotes = !inQuotes; continue; }
+          if (char === ',' && !inQuotes) {
+            values.push(current.trim());
+            current = '';
+            continue;
+          }
+          current += char;
+        }
+        values.push(current.trim());
+
+        const obj = {};
+        headers.forEach((h, i) => {
+          let val = values[i] || '';
+          // Convert numeric fields
+          if (['debtAmount', 'amountPaid', 'balance', 'daysOverdue'].includes(h)) {
+            val = val.replace(/,/g, '').replace(/TZS\s*/gi, '').trim();
+            obj[h] = val === '' ? 0 : parseFloat(val) || 0;
+          } else {
+            obj[h] = val;
+          }
+        });
+        return obj;
+      });
+    }
+
+        // ─── Import ──────────────────────────────────────────────────
+    importBtn.addEventListener('click', async function() {
+      if (!selectedFile) return;
+      this.disabled = true;
+      this.textContent = '⏳ Loading customers...';
+
+      try {
+        // ── 1. Load all customers ──
+        log('👤 Loading customers from Firestore...', 'info');
+        const customersSnap = await db.collection('customers').get();
+        const customerMap = {};
+        customersSnap.forEach(doc => {
+          const data = doc.data();
+          customerMap[data.cardNumber] = doc.id;
+        });
+        log(`✅ ${Object.keys(customerMap).length} customers loaded.`, 'success');
+
+        // ── 2. Parse CSV ──
+        const text = await selectedFile.text();
+        log('📄 Parsing CSV...', 'info');
+        const rawRecords = parseCSV(text);
+        log(`📦 ${rawRecords.length} debt records parsed.`, 'info');
+
+        // ── 3. Process debts with sequential IDs ──
+        let added = 0;
+        let skipped = 0;
+        const BATCH_SIZE = 400;
+
+        // ── Get the current counter ──
+        const counterRef = db.collection('counters').doc('debtCounter');
+        const counterSnap = await counterRef.get();
+        let counterValue = 1;
+        if (counterSnap.exists) {
+          counterValue = (counterSnap.data().count || 0) + 1;
+        }
+
+        for (let i = 0; i < rawRecords.length; i += BATCH_SIZE) {
+          const batch = db.batch();
+          const chunk = rawRecords.slice(i, i + BATCH_SIZE);
+
+          for (const r of chunk) {
+            const cardNumber = r.loyaltyCard || r.LoyaltyCard;
+            if (!cardNumber) {
+              log(`⚠️ Skipping debt without LoyaltyCard`, 'warning');
+              skipped++;
+              continue;
+            }
+
+            const customerId = customerMap[cardNumber];
+            if (!customerId) {
+              log(`⚠️ Customer not found for card: ${cardNumber} — skipping`, 'warning');
+              skipped++;
+              continue;
+            }
+
+            // ── Generate sequential Debt ID ──
+            const debtId = 'DEBT-' + String(counterValue).padStart(4, '0');
+            counterValue++;
+
+            const docRef = db.collection('debts').doc(debtId);
+
+            const debtData = {
+              debtId: debtId,
+              customerId: customerId,
+              cardNumber: cardNumber,
+              customerName: r.customerName || 'Unknown',
+              phone: r.phone || '',
+              originalAmount: parseFloat(r.debtAmount) || 0,
+              amountPaid: parseFloat(r.amountPaid) || 0,
+              balance: parseFloat(r.balance) || (parseFloat(r.debtAmount) || 0),
+              debtDate: r.debtDate || new Date().toISOString(),
+              dueDate: r.dueDate || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+              daysOverdue: parseInt(r.daysOverdue) || 0,
+              status: r.status || 'Pending',
+              lastPaymentDate: r.lastPaymentDate || null,
+              userID: r.userID || 'migration',
+              notes: r.notes || '',
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString()
+            };
+
+            batch.set(docRef, debtData);
+            added++;
+
+            // ── Update customer's totalDebt ──
+            const customerRef = db.collection('customers').doc(customerId);
+            batch.update(customerRef, {
+              totalDebt: firebase.firestore.FieldValue.increment(debtData.balance)
+            });
+          }
+
+          await batch.commit();
+          log(`✅ Batch ${Math.floor(i/BATCH_SIZE)+1} committed (${chunk.length} debts)`, 'success');
+        }
+
+        // ── Update the counter ──
+        await counterRef.set({ count: counterValue - 1 });
+
+        log(`\n📊 Summary:`, 'info');
+        log(`   ➕ Added: ${added}`, 'success');
+        log(`   ⏭️ Skipped: ${skipped}`, 'warning');
+        log(`🎉 Import complete!`, 'success');
+
+      } catch (err) {
+        log(`❌ Import error: ${err.message}`, 'error');
+        console.error(err);
+      } finally {
+        this.disabled = false;
+        this.textContent = '🚀 Import Debts';
+      }
+    });
+
+    log('📁 Drop your DebtLog.csv file or click to select.', 'info');
+    log('ℹ️ Debts will be linked to customers by LoyaltyCard → cardNumber.', 'info');
+  </script>
+</body>
+</html>

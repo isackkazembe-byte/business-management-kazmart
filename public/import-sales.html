@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Bulk Sales Import – with TransactionLog support</title>
+  <style>
+    body { font-family: 'Century Gothic', Arial, sans-serif; background: #f4f8fa; padding: 30px; }
+    .container { max-width: 900px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+    h1 { color: #0B5394; }
+    .drop-zone { border: 2px dashed #C9E8F3; border-radius: 8px; padding: 40px; text-align: center; cursor: pointer; transition: background 0.2s; margin-bottom:10px; }
+    .drop-zone:hover { background: #EAF4F9; }
+    .drop-zone.dragover { background: #C9E8F3; border-color: #117594; }
+    button { background: #117594; color: #fff; border: none; padding: 12px 30px; border-radius: 6px; font-size: 16px; font-weight: 700; cursor: pointer; margin-top: 10px; }
+    button:hover { background: #0D5A70; }
+    .log { background: #f0f0f0; padding: 10px; border-radius: 6px; font-family: 'Courier New', monospace; font-size: 12px; max-height: 400px; overflow-y: auto; white-space: pre-wrap; margin-top: 10px; }
+    .success { color: #1E7B34; }
+    .error { color: #CC0000; }
+    .info { color: #0B5394; }
+    .warning { color: #B45309; }
+    #fileInput, #txFileInput { display: none; }
+    .file-row { display: flex; gap: 20px; align-items: center; flex-wrap: wrap; margin: 10px 0; }
+    .file-label { background: #EAF4F9; padding: 8px 16px; border-radius: 6px; cursor: pointer; border: 1px solid #C9E8F3; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📦 Import Sales History</h1>
+    <p>Upload <strong>SalesLog CSV</strong> (merged from both databases). Optionally upload <strong>TransactionLog CSV</strong> (from the newer database).</p>
+    <div class="file-row">
+      <div class="file-label" onclick="document.getElementById('fileInput').click()">📂 Select SalesLog CSV</div>
+      <span id="salesFileLabel">No file selected</span>
+    </div>
+    <div class="file-row">
+      <div class="file-label" onclick="document.getElementById('txFileInput').click()">📂 Optional: Select TransactionLog CSV</div>
+      <span id="txFileLabel">No file selected</span>
+    </div>
+    <input type="file" id="fileInput" accept=".csv">
+    <input type="file" id="txFileInput" accept=".csv">
+    <button id="importBtn" disabled>🚀 Import Sales</button>
+    <div id="log" class="log">Ready to import...</div>
+  </div>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/12.15.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore-compat.js"></script>
+
+  <script>
+    // ─── Firebase Config ──────────────────────────────────────────
+    const firebaseConfig = {
+      apiKey: "AIzaSyA31nP6b9BuHvB4ffwQcKiHrs5vT7E0K4g",
+      authDomain: "biz-management-system-tz.firebaseapp.com",
+      projectId: "biz-management-system-tz",
+      storageBucket: "biz-management-system-tz.firebasestorage.app",
+      messagingSenderId: "246381480533",
+      appId: "1:246381480533:web:c6723c6277f61416e6e2dc"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    // ─── DOM ──────────────────────────────────────────────────────
+    const fileInput = document.getElementById('fileInput');
+    const txFileInput = document.getElementById('txFileInput');
+    const importBtn = document.getElementById('importBtn');
+    const logEl = document.getElementById('log');
+    const salesFileLabel = document.getElementById('salesFileLabel');
+    const txFileLabel = document.getElementById('txFileLabel');
+
+    let salesFile = null;
+    let txFile = null;
+
+    function log(msg, type) {
+      const colors = { success: '#1E7B34', error: '#CC0000', info: '#0B5394', warning: '#B45309' };
+      const color = colors[type] || '#333';
+      logEl.innerHTML += `<span style="color:${color}">${msg}</span>\n`;
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    // ─── File handlers ──────────────────────────────────────────
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files.length) {
+        salesFile = e.target.files[0];
+        salesFileLabel.textContent = salesFile.name;
+        checkReady();
+      }
+    });
+
+    txFileInput.addEventListener('change', (e) => {
+      if (e.target.files.length) {
+        txFile = e.target.files[0];
+        txFileLabel.textContent = txFile.name;
+        checkReady();
+      }
+    });
+
+    function checkReady() {
+      importBtn.disabled = !salesFile;
+    }
+
+    // ─── Parse CSV ──────────────────────────────────────────────
+    function parseCSV(text) {
+      const lines = text.trim().split('\n');
+      const headers = lines[0].split(',').map(h => h.trim());
+      return lines.slice(1).map(line => {
+        const values = [];
+        let current = '';
+        let inQuotes = false;
+        for (const char of line) {
+          if (char === '"') { inQuotes = !inQuotes; continue; }
+          if (char === ',' && !inQuotes) {
+            values.push(current.trim());
+            current = '';
+            continue;
+          }
+          current += char;
+        }
+        values.push(current.trim());
+
+        const obj = {};
+        headers.forEach((h, i) => {
+          let val = values[i] || '';
+          if (['QTY Sold', 'Unit Price', 'Total Price', 'WAC per PC', 'Total WAC', 'Daily Gross Profit'].includes(h)) {
+            val = val.replace(/,/g, '').trim();
+            obj[h] = val === '' ? 0 : parseFloat(val) || 0;
+          } else {
+            obj[h] = val;
+          }
+        });
+        return obj;
+      });
+    }
+
+    // ─── Robust date parser ────────────────────────────────────
+    function parseDate(dateStr, timeStr) {
+      if (!dateStr) return new Date();
+      // Try common formats
+      let d = dateStr.trim();
+      let t = (timeStr || '00:00:00').trim();
+      // If time is empty, default to midnight
+      if (!t) t = '00:00:00';
+      // Try ISO first
+      let dt = new Date(d + 'T' + t);
+      if (!isNaN(dt)) return dt;
+      // Try dd/MM/yyyy
+      let parts = d.split('/');
+      if (parts.length === 3 && parts[0].length <= 2 && parts[1].length <= 2 && parts[2].length === 4) {
+        let day = parseInt(parts[0]);
+        let month = parseInt(parts[1]) - 1;
+        let year = parseInt(parts[2]);
+        dt = new Date(year, month, day);
+        // Now add time
+        let timeParts = t.split(':');
+        if (timeParts.length >= 2) {
+          dt.setHours(parseInt(timeParts[0]) || 0, parseInt(timeParts[1]) || 0, parseInt(timeParts[2]) || 0);
+        }
+        if (!isNaN(dt)) return dt;
+      }
+      // Try dd-MMM-yyyy (e.g., 11-Jul-2026)
+      parts = d.split('-');
+      if (parts.length === 3) {
+        let day = parseInt(parts[0]);
+        let monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        let month = monthNames.indexOf(parts[1].substring(0,3));
+        let year = parseInt(parts[2]);
+        if (!isNaN(day) && month !== -1 && !isNaN(year)) {
+          dt = new Date(year, month, day);
+          let timeParts = t.split(':');
+          if (timeParts.length >= 2) {
+            dt.setHours(parseInt(timeParts[0]) || 0, parseInt(timeParts[1]) || 0, parseInt(timeParts[2]) || 0);
+          }
+          if (!isNaN(dt)) return dt;
+        }
+      }
+      // Fallback: try new Date(dateStr + ' ' + timeStr)
+      dt = new Date(d + ' ' + t);
+      if (!isNaN(dt)) return dt;
+      // Last resort: current date
+      console.warn('Could not parse date:', dateStr, timeStr);
+      return new Date();
+    }
+
+    // ─── Helper: generate sale ID ──────────────────────────────
+    async function generateSaleId() {
+      const counterRef = db.collection('counters').doc('salesCounter');
+      const counterDoc = await counterRef.get();
+      let count = 1;
+      if (counterDoc.exists) {
+        count = (counterDoc.data().count || 0) + 1;
+        await counterRef.update({ count: count });
+      } else {
+        await counterRef.set({ count: count });
+      }
+      return 'SAL-' + String(count).padStart(4, '0');
+    }
+
+    async function generateSalesItemId() {
+      const counterRef = db.collection('counters').doc('salesItemsCounter');
+      const counterDoc = await counterRef.get();
+      let count = 1;
+      if (counterDoc.exists) {
+        count = (counterDoc.data().count || 0) + 1;
+        await counterRef.update({ count: count });
+      } else {
+        await counterRef.set({ count: count });
+      }
+      return 'SI-' + String(count).padStart(4, '0');
+    }
+
+    // ─── Helper: get or create customer ─────────────────────────
+    async function getOrCreateCustomer(cardNumber, name) {
+      if (!cardNumber || cardNumber === 'KM-0000') return null;
+      const q = await db.collection('customers').where('cardNumber', '==', cardNumber).limit(1).get();
+      if (!q.empty) return q.docs[0].ref;
+      // Create new customer
+      const newRef = db.collection('customers').doc();
+      await newRef.set({
+        cardNumber: cardNumber,
+        customerName: name || 'Imported Customer',
+        phone: '',
+        email: '',
+        loyaltyPoints: 0,
+        totalDebt: 0,
+        totalAmountSpent: 0,
+        totalVisits: 0,
+        status: 'Active',
+        createdAt: new Date().toISOString()
+      });
+      return newRef;
+    }
+
+    // ─── Import ──────────────────────────────────────────────────
+    importBtn.addEventListener('click', async function() {
+      if (!salesFile) return;
+      this.disabled = true;
+      this.textContent = '⏳ Importing...';
+
+      try {
+        // 1. Read files
+        const salesText = await salesFile.text();
+        const salesRows = parseCSV(salesText);
+        log(`📄 SalesLog: ${salesRows.length} rows parsed.`, 'info');
+
+        let txMap = {};
+        if (txFile) {
+          const txText = await txFile.text();
+          const txRows = parseCSV(txText);
+          txRows.forEach(row => {
+            txMap[row.TransactionID] = row;
+          });
+          log(`📄 TransactionLog: ${txRows.length} rows parsed.`, 'info');
+        }
+
+        // 2. Group SalesLog rows by sale
+        const groups = {};
+        for (const row of salesRows) {
+          let key;
+          if (row.TransactionID && row.TransactionID.trim() !== '' && txMap[row.TransactionID]) {
+            // Use TransactionID if we have header data
+            key = row.TransactionID;
+          } else {
+            // Group by Date + Time (rounded to minute) + CustomerName if exists
+            const datePart = row.Date || '';
+            const timePart = (row.Time || '00:00:00').slice(0,5); // HH:mm
+            const customer = row['Customer Name'] || 'Guest';
+            key = datePart + '|' + timePart + '|' + customer;
+          }
+          if (!groups[key]) groups[key] = [];
+          groups[key].push(row);
+        }
+
+        const groupKeys = Object.keys(groups);
+        log(`📦 Grouped into ${groupKeys.length} sales.`, 'info');
+
+        let addedSales = 0;
+        let addedItems = 0;
+        let updatedCustomers = 0;
+        const BATCH_SIZE = 50;
+
+        for (let i = 0; i < groupKeys.length; i += BATCH_SIZE) {
+          const batch = db.batch();
+          const chunk = groupKeys.slice(i, i + BATCH_SIZE);
+
+          for (const key of chunk) {
+            const items = groups[key];
+            const first = items[0];
+
+            // Determine sale header
+            let header = null;
+            if (first.TransactionID && txMap[first.TransactionID]) {
+              header = txMap[first.TransactionID];
+            }
+
+            // Parse date
+            const saleDateObj = parseDate(first.Date, first.Time);
+            const saleDate = saleDateObj.toISOString();
+
+            const customerCard = header ? header.LoyaltyCard : (first['Loyalty Card'] || 'KM-0000');
+            const customerName = header ? header.CustomerName : (first['Customer Name'] || 'Guest');
+            const paymentType = header ? header.PaymentType : (first['Payment Type'] || 'Full Paid');
+            const totalAmount = header ? parseFloat(header.TotalAmount) : items.reduce((sum, item) => sum + (item['Total Price'] || 0), 0);
+            const subtotal = header ? parseFloat(header.Subtotal) : totalAmount;
+            const discount = header ? parseFloat(header.DiscountAmount) || 0 : 0;
+            const amountPaid = header ? parseFloat(header.AmountPaid) : totalAmount;
+            const debtAmount = header ? parseFloat(header.DebtAmount) || 0 : 0;
+            const loyaltyRedeemed = header ? parseFloat(header.LoyaltyRedeemed) || 0 : 0;
+            const pointsEarned = header ? parseFloat(header.PointsEarned) || 0 : Math.floor(totalAmount / 100);
+
+            // Get customer reference
+            let customerRef = null;
+            if (customerCard && customerCard !== 'KM-0000') {
+              customerRef = await getOrCreateCustomer(customerCard, customerName);
+            }
+
+            // Generate sale ID
+            const saleId = await generateSaleId();
+            const saleRef = db.collection('sales').doc(saleId);
+
+            // Build sale data
+            const saleData = {
+              saleId: saleId,
+              customerId: customerRef ? customerRef.id : null,
+              cardNumber: customerCard || 'KM-0000',
+              customerName: customerName || 'Guest',
+              saleDate: saleDate,
+              subtotal: subtotal,
+              discount: discount,
+              totalAmount: totalAmount,
+              amountPaid: amountPaid,
+              balance: Math.max(0, totalAmount - amountPaid),
+              paymentMethod: paymentType,
+              paymentStatus: paymentType === 'Full Paid' ? 'Paid' : 'Partial',
+              grossProfit: 0,
+              profitMargin: 0,
+              cashierId: header ? header.UserID : (first['UserID'] || 'import'),
+              createdAt: new Date().toISOString(),
+              importedFrom: 'SalesLog',
+              originalTransactionId: first.TransactionID || ''
+            };
+
+            batch.set(saleRef, saleData);
+
+            // Process items
+            let totalCost = 0;
+            for (const item of items) {
+              const itemId = await generateSalesItemId();
+              const itemRef = db.collection('salesItems').doc(itemId);
+              const productName = item['Item'] || '';
+              const qty = item['QTY Sold'] || 0;
+              const unitPrice = item['Unit Price'] || 0;
+              const lineTotal = qty * unitPrice;
+              const wac = item['WAC per PC'] || 0;
+              const lineCost = qty * wac;
+              totalCost += lineCost;
+
+              // Try to find product ID by productName
+              let productId = null;
+              if (productName) {
+                const prodQuery = await db.collection('products').where('productName', '==', productName).limit(1).get();
+                if (!prodQuery.empty) productId = prodQuery.docs[0].id;
+              }
+
+              batch.set(itemRef, {
+                itemId: itemId,
+                saleId: saleId,
+                productid: productId,
+                productName: productName,
+                quantity: qty,
+                sellingPrice: unitPrice,
+                costPrice: wac,
+                discount: 0,
+                subtotal: lineTotal
+              });
+              addedItems++;
+            }
+
+            // Update grossProfit
+            const grossProfit = subtotal - totalCost;
+            const profitMargin = subtotal > 0 ? (grossProfit / subtotal) * 100 : 0;
+            batch.update(saleRef, {
+              grossProfit: grossProfit,
+              profitMargin: profitMargin
+            });
+
+            addedSales++;
+          }
+
+          // Commit batch
+          await batch.commit();
+          log(`✅ Batch ${Math.floor(i/BATCH_SIZE)+1} committed (${Math.min(i+BATCH_SIZE, groupKeys.length)}/${groupKeys.length})`, 'success');
+
+          // Now update customers for this batch (outside batch)
+          for (const key of chunk) {
+            const items = groups[key];
+            const first = items[0];
+            const header = first.TransactionID && txMap[first.TransactionID] ? txMap[first.TransactionID] : null;
+            const customerCard = header ? header.LoyaltyCard : (first['Loyalty Card'] || 'KM-0000');
+            const customerName = header ? header.CustomerName : (first['Customer Name'] || 'Guest');
+            if (customerCard && customerCard !== 'KM-0000') {
+              const total = header ? parseFloat(header.TotalAmount) : items.reduce((sum, item) => sum + (item['Total Price'] || 0), 0);
+              const saleDateObj = parseDate(first.Date, first.Time);
+              const saleDate = saleDateObj.toISOString();
+              const custQuery = await db.collection('customers').where('cardNumber', '==', customerCard).limit(1).get();
+              if (!custQuery.empty) {
+                const custRef = custQuery.docs[0].ref;
+                const custData = custQuery.docs[0].data();
+                const currentSpent = custData.totalAmountSpent || 0;
+                const currentVisits = custData.totalVisits || 0;
+                await custRef.update({
+                  totalAmountSpent: currentSpent + total,
+                  totalVisits: currentVisits + 1,
+                  lastVisit: saleDate
+                });
+                updatedCustomers++;
+              } else {
+                // Should have been created, but just in case
+                const newRef = db.collection('customers').doc();
+                await newRef.set({
+                  cardNumber: customerCard,
+                  customerName: customerName,
+                  phone: '',
+                  email: '',
+                  loyaltyPoints: 0,
+                  totalDebt: 0,
+                  totalAmountSpent: total,
+                  totalVisits: 1,
+                  lastVisit: saleDate,
+                  status: 'Active',
+                  createdAt: new Date().toISOString()
+                });
+              }
+            }
+          }
+        }
+
+        log(`\n📊 Summary:`, 'info');
+        log(`   ➕ Added sales: ${addedSales}`, 'success');
+        log(`   📦 Added items: ${addedItems}`, 'success');
+        log(`   👤 Updated customers: ${updatedCustomers}`, 'info');
+        log(`🎉 Import complete!`, 'success');
+
+      } catch (err) {
+        log(`❌ Import error: ${err.message}`, 'error');
+        console.error(err);
+      } finally {
+        this.disabled = false;
+        this.textContent = '🚀 Import Sales';
+      }
+    });
+
+    log('📁 Upload your merged SalesLog CSV and optionally TransactionLog CSV.', 'info');
+  </script>
+</body>
+</html>

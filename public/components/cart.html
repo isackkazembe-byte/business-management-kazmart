@@ -1,0 +1,154 @@
+<div style="padding:10px 14px; font-family: 'Century Gothic', 'Trebuchet MS', Arial, sans-serif; display:flex; flex-direction:column; height:100%;">
+  
+  <!-- Customer Search -->
+  <div style="display:flex; gap:6px; margin-bottom:8px; flex-shrink:0;">
+    <input type="text" id="customerSearch" placeholder="Search customer by name or card..." style="flex:1; padding:6px 10px; border:1.5px solid #C9E8F3; border-radius:6px; font-size:12px; outline:none; font-family:inherit;" />
+    <button id="btnNewCustomer" onclick="openAddCustomerModal()" style="background:#117594; color:#fff; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-size:11px; font-weight:600; font-family:inherit; white-space:nowrap;">+ New</button>
+  </div>
+
+  <div id="custDropdown" style="display:none; position:relative; background:#fff; border:1px solid #DDE6EA; border-radius:6px; max-height:200px; overflow-y:auto; margin-bottom:8px; z-index:10;"></div>
+
+    <!-- Customer Summary Ribbon (hidden by default) -->
+<div id="customerSummary" style="display:none; background:#0B3B4A; border-radius:6px; padding:8px 12px; margin-bottom:8px; color:#fff; font-family: var(--font);">
+  <!-- Customer Name -->
+  <div style="font-size:16px; font-weight:800; color:#FFD700; margin-bottom:4px; border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:4px; display:flex; justify-content:space-between; align-items:center;">
+  <span id="sumCustomerName">—</span>
+  <div style="display:flex; align-items:center; gap:8px;">
+    <span id="sumStatus" style="font-size:11px; padding:2px 10px; border-radius:12px; background:#1E7B34; color:#fff; font-weight:600;">Active</span>
+    <!-- ✕ Close/Cancel Button -->
+    <button onclick="resetCust()" 
+            style="background:rgba(255,255,255,0.15); border:none; color:#fff; width:24px; height:24px; border-radius:50%; cursor:pointer; font-size:14px; font-weight:700; display:flex; align-items:center; justify-content:center; transition:0.15s;" 
+            onmouseover="this.style.background='rgba(255,255,255,0.3)';" 
+            onmouseout="this.style.background='rgba(255,255,255,0.15)';" 
+            title="Clear customer">
+      ✕
+    </button>
+  </div>
+</div>
+  
+  <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:4px; text-align:center;">
+    <div>
+      <div style="font-size:9px; color:rgba(255,255,255,0.5); text-transform:uppercase;">Total Spent</div>
+      <div style="font-size:15px; font-weight:700; color:#FFD700;" id="sumTotalSpent">TZS 0</div>
+    </div>
+    <div>
+      <div style="font-size:9px; color:rgba(255,255,255,0.5); text-transform:uppercase;">Points</div>
+      <div style="font-size:15px; font-weight:700; color:#4CAF50;" id="sumPointsBalance">0</div>
+    </div>
+    <div>
+      <div style="font-size:9px; color:rgba(255,255,255,0.5); text-transform:uppercase;">Debt</div>
+      <div style="font-size:15px; font-weight:700; color:#FF6B6B;" id="sumTotalDebt">TZS 0</div>
+    </div>
+  </div>
+  
+  <div style="display:flex; justify-content:space-between; font-size:11px; margin-top:4px; border-top:1px solid rgba(255,255,255,0.08); padding-top:4px;">
+    <span>Earned: <strong id="sumPointsEarned" style="color:#FFD700;">0</strong></span>
+    <span>Redeemed: <strong id="sumPointsRedeemed" style="color:#FF9800;">0</strong></span>
+    <span>Repaid: <strong id="sumDebtRepaid" style="color:#4CAF50;">0%</strong></span>
+  </div>
+  
+  <!-- NEW: Last visit & Days -->
+  <div style="display:flex; justify-content:space-between; font-size:11px; margin-top:4px; border-top:1px solid rgba(255,255,255,0.08); padding-top:4px;">
+    <span>Last visit: <strong id="sumLastVisit" style="font-weight:400;">—</strong></span>
+    <span>Days ago: <strong id="sumDaysSince" style="font-weight:400;">—</strong></span>
+  </div>
+</div>
+
+    <!-- Cart Items – fills remaining space -->
+  <div style="display:flex; flex-direction:column; flex:1; min-height:0;">
+    <div style="display:flex; justify-content:space-between; margin-bottom:6px; flex-shrink:0;">
+      <span style="font-size:12px; font-weight:700; color:#0B5394;">🛒 Cart (<span id="cartCount">0</span>)</span>
+    </div>
+    <div id="cartItems" style="color:#999; font-size:12px; font-family:inherit; flex:1; overflow-y:auto; min-height:40px;">
+      Cart is empty
+    </div>
+  </div>
+
+  <!-- ============================================================
+     CART TOTALS (with Points Value)
+     ============================================================ -->
+<div style="padding:6px 10px; background:#f9fafb; border-radius:6px; margin-top:4px;">
+  
+  <!-- Subtotal -->
+  <div style="display:flex; justify-content:space-between; font-size:12px; color:#595959; padding:1px 0;">
+    <span>Subtotal</span>
+    <span id="cartSubtotal">TZS 0</span>
+  </div>
+  
+  <!-- Discount -->
+  <div style="display:flex; justify-content:space-between; font-size:12px; color:#CC0000; padding:1px 0;" id="discountRow">
+    <span>Discount</span>
+    <span id="cartDiscount">- TZS 0</span>
+  </div>
+  
+<!-- Loyalty Discount (applied) -->
+<div style="display:flex; justify-content:space-between; font-size:12px; color:#FF9800; padding:1px 0;" id="loyaltyDiscountRow">
+  <span>Loyalty Discount</span>
+  <span id="cartLoyaltyDiscount">- TZS 0</span>
+</div>
+
+  <!-- ===== NEW: Points Value ===== -->
+  <div style="display:flex; justify-content:space-between; font-size:12px; color:#FF9800; padding:1px 0;">
+    <span>Points Available (TZS)</span>
+    <span id="pointsValueDisplay">TZS 0</span>
+  </div>
+  
+  <!-- Total -->
+  <div style="display:flex; justify-content:space-between; font-size:16px; font-weight:700; color:#0B5394; border-top:2px solid #DDE6EA; padding-top:4px; margin-top:2px;">
+    <span>TOTAL</span>
+    <span id="cartTotal">TZS 0</span>
+  </div>
+  
+</div>
+
+<!-- ============================================================
+     DISCOUNT + LOYALTY (combined row, properly aligned)
+     ============================================================ -->
+<div style="display:flex; gap:8px; margin-top:4px;">
+  <!-- Discount Input -->
+  <div style="flex:1; background:#fff; border:1px solid #DDE6EA; border-radius:6px; padding:4px 8px; display:flex; flex-direction:column;">
+    <label style="font-size:10px; color:#595959; font-weight:600;">Discount (TZS)</label>
+    <input type="number" id="discountInput" value="0" min="0" step="100" style="width:100%; padding:4px 6px; border:1px solid #C9E8F3; border-radius:4px; font-size:13px; font-family:inherit; box-sizing:border-box;" />
+  </div>
+  <!-- Loyalty Points -->
+  <div style="flex:1; background:#fff; border:1px solid #DDE6EA; border-radius:6px; padding:4px 8px; display:flex; flex-direction:column;">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <label style="font-size:10px; color:#595959; font-weight:600;">Use Points</label>
+      <div style="display:flex; align-items:center; gap:4px;">
+        <input type="number" id="loyalInput" value="0" min="0" style="width:60px; padding:4px 4px; border:1px solid #C9E8F3; border-radius:4px; font-size:13px; font-weight:600; text-align:center; font-family:inherit;" />
+        <span style="font-size:12px; font-weight:700; color:#117594;" id="loyalBal">0 pts</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     PAYMENT TYPE BUTTONS (compacted)
+     ============================================================ -->
+<div style="display:flex; gap:4px; margin-top:4px;">
+  <button class="pay-btn active" data-type="Full Paid" style="flex:1; padding:6px 0; background:#117594; color:#fff; border:1px solid #117594; border-radius:5px; cursor:pointer; font-weight:700; font-size:12px; font-family:inherit;">Full</button>
+  <button class="pay-btn" data-type="Partial" style="flex:1; padding:6px 0; background:#fff; color:#0B5394; border:1px solid #C9E8F3; border-radius:5px; cursor:pointer; font-weight:700; font-size:12px; font-family:inherit;">Partial</button>
+  <button class="pay-btn" data-type="Debt" style="flex:1; padding:6px 0; background:#fff; color:#0B5394; border:1px solid #C9E8F3; border-radius:5px; cursor:pointer; font-weight:700; font-size:12px; font-family:inherit;">Debt</button>
+</div>
+
+<!-- ============================================================
+     CASH RECEIVED (compacted)
+     ============================================================ -->
+<div style="padding:4px 10px; background:#fff; border:1px solid #DDE6EA; border-radius:6px; margin-top:4px;">
+  <label style="font-size:11px; font-weight:700; color:#0B5394; display:block; margin-bottom:2px;">Cash Received (TZS)</label>
+  <input type="number" id="cashReceived" value="0" min="0" step="100" style="width:100%; padding:8px 10px; border:1.5px solid #C9E8F3; border-radius:5px; font-size:18px; font-weight:700; font-family:inherit; box-sizing:border-box; text-align:right;" />
+  
+  <!-- Change Display (smaller) -->
+  <div style="margin-top:4px; text-align:right; font-size:15px; font-weight:700; color:#1E7B34;">
+    Change: <span id="changeDisplay">TZS 0</span>
+  </div>
+</div>
+
+<!-- ============================================================
+     COMPLETE SALE BUTTON (compacted)
+     ============================================================ -->
+<button id="completeSale" style="width:100%; padding:12px 16px; background:linear-gradient(135deg, #117594, #0D5A70); color:#fff; border:none; border-radius:7px; cursor:pointer; font-size:18px; font-weight:800; font-family:'Century Gothic','Trebuchet MS',Arial,sans-serif; margin-top:6px; box-shadow:0 3px 0 #0B3B4A, 0 4px 12px rgba(17,117,148,0.3); transition:all 0.12s; letter-spacing:1px; text-transform:uppercase;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 5px 0 #0B3B4A, 0 6px 20px rgba(17,117,148,0.4)';" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 3px 0 #0B3B4A, 0 4px 12px rgba(17,117,148,0.3)';" onmousedown="this.style.transform='translateY(2px)';this.style.boxShadow='0 1px 0 #0B3B4A';" onmouseup="this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 0 #0B3B4A';">
+  ✔ COMPLETE SALE
+</button>
+
+</div>

@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Import Customers – Custom Document IDs</title>
+  <style>
+    body { font-family: 'Century Gothic', Arial, sans-serif; background: #f4f8fa; padding: 30px; }
+    .container { max-width: 800px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+    h1 { color: #0B5394; }
+    .drop-zone { border: 2px dashed #C9E8F3; border-radius: 8px; padding: 40px; text-align: center; cursor: pointer; transition: background 0.2s; }
+    .drop-zone:hover { background: #EAF4F9; }
+    .drop-zone.dragover { background: #C9E8F3; border-color: #117594; }
+    button { background: #117594; color: #fff; border: none; padding: 12px 30px; border-radius: 6px; font-size: 16px; font-weight: 700; cursor: pointer; margin-top: 10px; }
+    button:hover { background: #0D5A70; }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    .log { background: #f0f0f0; padding: 10px; border-radius: 6px; font-family: 'Courier New', monospace; font-size: 12px; max-height: 300px; overflow-y: auto; white-space: pre-wrap; margin-top: 10px; }
+    .success { color: #1E7B34; }
+    .error { color: #CC0000; }
+    .info { color: #0B5394; }
+    .warning { color: #B45309; }
+    #fileInput { display: none; }
+    label { display: block; margin: 10px 0; font-weight: 600; color: #0B5394; }
+    label input[type="checkbox"] { width: 18px; height: 18px; margin-right: 8px; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>👥 Import Customers</h1>
+    <p>Upload your <strong>customers.csv</strong> file. The <strong>cardNumber</strong> column will be used as the Firestore document ID.</p>
+
+    <div class="drop-zone" id="dropZone">
+      <p style="font-size: 18px; color: #0B5394;">📂 Drag & drop your CSV file here</p>
+      <p style="color: #999;">or click to select</p>
+    </div>
+    <input type="file" id="fileInput" accept=".csv">
+
+    <label>
+      <input type="checkbox" id="updateCheckbox" checked>
+      ✅ Update existing customers (if unchecked, duplicates will be skipped)
+    </label>
+
+    <button id="importBtn" disabled>🚀 Import Customers</button>
+    <div id="log" class="log">Ready to import...</div>
+  </div>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/12.15.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore-compat.js"></script>
+
+  <script>
+    // ─── Firebase Config ──────────────────────────────────────────
+    const firebaseConfig = {
+  apiKey: "AIzaSyA31nP6b9BuHvB4ffwQcKiHrs5vT7E0K4g",
+  authDomain: "biz-management-system-tz.firebaseapp.com",
+  projectId: "biz-management-system-tz",
+  storageBucket: "biz-management-system-tz.firebasestorage.app",
+  messagingSenderId: "246381480533",
+  appId: "1:246381480533:web:c6723c6277f61416e6e2dc"
+};
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    // ─── DOM ──────────────────────────────────────────────────────
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+    const importBtn = document.getElementById('importBtn');
+    const logEl = document.getElementById('log');
+    const updateCheckbox = document.getElementById('updateCheckbox');
+
+    let selectedFile = null;
+
+    function log(msg, type) {
+      const colors = { success: '#1E7B34', error: '#CC0000', info: '#0B5394', warning: '#B45309' };
+      const color = colors[type] || '#333';
+      logEl.innerHTML += `<span style="color:${color}">${msg}</span>\n`;
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    // ─── Drag & Drop ──────────────────────────────────────────────
+    dropZone.addEventListener('click', () => fileInput.click());
+    dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropZone.classList.remove('dragover');
+      if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files.length) handleFile(e.target.files[0]);
+    });
+
+    function handleFile(file) {
+      if (!file.name.endsWith('.csv')) {
+        log('❌ Please select a CSV file.', 'error');
+        return;
+      }
+      selectedFile = file;
+      importBtn.disabled = false;
+      log(`✅ Selected: ${file.name} (${(file.size/1024).toFixed(1)} KB)`, 'success');
+    }
+
+    // ─── Parse CSV ────────────────────────────────────────────────
+    function parseCSV(text) {
+      const lines = text.trim().split('\n');
+      const headers = lines[0].split(',').map(h => h.trim());
+      return lines.slice(1).map(line => {
+        const values = [];
+        let current = '';
+        let inQuotes = false;
+        for (const char of line) {
+          if (char === '"') { inQuotes = !inQuotes; continue; }
+          if (char === ',' && !inQuotes) {
+            values.push(current.trim());
+            current = '';
+            continue;
+          }
+          current += char;
+        }
+        values.push(current.trim());
+
+        const obj = {};
+        headers.forEach((h, i) => {
+          let val = values[i] || '';
+          // Convert numeric fields
+          if (['totalVisits', 'totalAmountSpent', 'totalPointsEarned', 'totalPointsRedeemed', 'pointsBalance', 'pointsValueTZS', 'totalDebt'].includes(h)) {
+            val = val.replace(/,/g, '').trim();
+            obj[h] = val === '' ? 0 : parseFloat(val) || 0;
+          } else if (['dateCreated', 'lastVisit'].includes(h)) {
+            // Convert date to ISO string
+            if (val) {
+              try {
+                const d = new Date(val);
+                obj[h] = isNaN(d) ? val : d.toISOString();
+              } catch(e) { obj[h] = val; }
+            } else { obj[h] = null; }
+          } else {
+            obj[h] = val;
+          }
+        });
+        return obj;
+      });
+    }
+
+    // ─── Import ──────────────────────────────────────────────────
+        importBtn.addEventListener('click', async function() {
+  if (!selectedFile) return;
+
+  if (updateCheckbox.checked) {
+    const confirmed = confirm(
+      '⚠️ WARNING: "Update existing customers" is ON.\n\n' +
+      'This will OVERWRITE all fields (including points balance and debt) ' +
+      'for any customer already in the system whose Card Number matches this file.\n\n' +
+      'Make sure this CSV has the correct, up-to-date information.\n\n' +
+      'Continue with import?'
+    );
+    if (!confirmed) return;
+  }
+      this.disabled = true;
+      this.textContent = '⏳ Importing...';
+
+      try {
+        const text = await selectedFile.text();
+        log('📄 Parsing CSV...', 'info');
+
+        const rawCustomers = parseCSV(text);
+log(`📦 ${rawCustomers.length} rows parsed from CSV.`, 'info');
+
+// ─── Remove duplicates WITHIN the CSV itself ───
+const seenInFile = new Set();
+const customers = [];
+let duplicatesInFile = 0;
+
+for (const c of rawCustomers) {
+  const cardNumber = c.cardNumber;
+  if (!cardNumber) {
+    customers.push(c); // let the existing "no cardNumber" check handle this later
+    continue;
+  }
+  if (seenInFile.has(cardNumber)) {
+    log(`⚠️ Duplicate in CSV file: ${cardNumber} (${c.customerName}) — only first occurrence will be used`, 'warning');
+    duplicatesInFile++;
+    continue;
+  }
+  seenInFile.add(cardNumber);
+  customers.push(c);
+}
+
+if (duplicatesInFile > 0) {
+  log(`🔁 Found and removed ${duplicatesInFile} duplicate row(s) within the CSV file.`, 'warning');
+}
+
+log(`📦 ${customers.length} unique customers will be processed.`, 'info');
+
+        const updateMode = updateCheckbox.checked;
+
+        let added = 0;
+        let updated = 0;
+        let skipped = 0;
+
+        // ─── Process one by one (no batch for clarity) ───
+        for (const c of customers) {
+          const cardNumber = c.cardNumber;
+          if (!cardNumber) {
+            log('⚠️ Skipping customer with no cardNumber', 'warning');
+            skipped++;
+            continue;
+          }
+
+          // ✅ USE THE CARD NUMBER AS THE DOCUMENT ID
+          const docRef = db.collection('customers').doc(cardNumber);
+
+          // ✅ CHECK IF THE DOCUMENT ALREADY EXISTS
+          const docSnap = await docRef.get();
+
+          if (docSnap.exists && !updateMode) {
+            // ── SKIP DUPLICATE ──
+            log(`⏭️ Skipped ${cardNumber} (${c.customerName})`, 'warning');
+            skipped++;
+            continue;
+          }
+
+          // ── PREPARE DATA (include cardNumber as a field) ──
+          const { cardNumber: _, ...rest } = c; // Remove cardNumber from rest
+          const customerData = {
+            ...rest,
+            cardNumber: cardNumber  // ✅ Store cardNumber as a field
+          };
+
+          if (docSnap.exists && updateMode) {
+            // ── UPDATE EXISTING ──
+            await docRef.update(customerData);
+            log(`🔄 Updated ${cardNumber} (${c.customerName})`, 'info');
+            updated++;
+          } else {
+            // ── ADD NEW ──
+            await docRef.set(customerData);
+            log(`➕ Added ${cardNumber} (${c.customerName})`, 'success');
+            added++;
+          }
+        }
+
+        log(`\n📊 Summary:`, 'info');
+        log(`   ➕ Added: ${added}`, 'success');
+        log(`   🔄 Updated: ${updated}`, 'info');
+        log(`   ⏭️ Skipped: ${skipped}`, 'warning');
+        log(`🎉 Import complete!`, 'success');
+
+        // Update counter
+        try {
+          const counterRef = db.collection('counters').doc('customerCounter');
+          const counterSnap = await counterRef.get();
+          let maxNumber = 0;
+          for (const c of customers) {
+            const num = parseInt(c.cardNumber.replace('KM-', ''));
+            if (num > maxNumber) maxNumber = num;
+          }
+          if (counterSnap.exists) {
+            const currentCount = counterSnap.data().count || 0;
+            if (maxNumber > currentCount) {
+              await counterRef.update({ count: maxNumber });
+              log(`✅ Counter updated to ${maxNumber}`, 'success');
+            }
+          } else {
+            await counterRef.set({ count: maxNumber });
+            log(`✅ Counter set to ${maxNumber}`, 'success');
+          }
+        } catch(e) {
+          log(`⚠️ Could not update counter: ${e.message}`, 'warning');
+        }
+
+      } catch (err) {
+        log(`❌ Import error: ${err.message}`, 'error');
+        console.error(err);
+      } finally {
+        this.disabled = false;
+        this.textContent = '🚀 Import Customers';
+      }
+    });
+
+    log('📁 Drop your customers.csv file or click to select.', 'info');
+    log('ℹ️ The cardNumber column will be used as the document ID.', 'info');
+  </script>
+</body>
+</html>

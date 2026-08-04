@@ -1,0 +1,53 @@
+// ─── FULL CLEAN RESET (Keep customers and settings) ──────
+async function fullCleanReset() {
+  if (!confirm('⚠️ This will DELETE all products, summaries, sales, debts, payments, cash, shifts, and inventory transactions. Customers and settings will be kept. Continue?')) return;
+
+  const collections = [
+    'products',
+    'inventorySummary',
+    'sales',
+    'salesItems',
+    'debts',
+    'payments',
+    'inventoryTransactions',
+    'cashTransactions',
+    'shifts'
+  ];
+
+  for (const col of collections) {
+    console.log(`🗑️ Emptying ${col}...`);
+    const snap = await firebase.firestore().collection(col).get();
+    if (snap.empty) {
+      console.log(`ℹ️ ${col} already empty.`);
+      continue;
+    }
+    let batch = firebase.firestore().batch();
+    let count = 0;
+    for (const doc of snap.docs) {
+      batch.delete(doc.ref);
+      count++;
+      if (count % 500 === 0) {
+        await batch.commit();
+        batch = firebase.firestore().batch();
+      }
+    }
+    await batch.commit();
+    console.log(`✅ Deleted ${count} documents from ${col}.`);
+  }
+
+  const counters = [
+    'productCounter',
+    'salesCounter',
+    'salesItemsCounter',
+    'debtCounter',
+    'transactionCounter',
+    'paymentCounter'
+  ];
+  for (const name of counters) {
+    await firebase.firestore().collection('counters').doc(name).set({ count: 0 });
+    console.log(`✅ Reset counter: ${name}`);
+  }
+
+  console.log('🎉 Full reset complete! Ready for product import.');
+}
+fullCleanReset();

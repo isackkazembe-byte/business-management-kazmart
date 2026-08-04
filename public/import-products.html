@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Bulk Product Import – with Update/Skip</title>
+  <style>
+    body { font-family: 'Century Gothic', Arial, sans-serif; background: #f4f8fa; padding: 30px; }
+    .container { max-width: 800px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+    h1 { color: #0B5394; }
+    .drop-zone { border: 2px dashed #C9E8F3; border-radius: 8px; padding: 40px; text-align: center; cursor: pointer; transition: background 0.2s; }
+    .drop-zone:hover { background: #EAF4F9; }
+    .drop-zone.dragover { background: #C9E8F3; border-color: #117594; }
+    button { background: #117594; color: #fff; border: none; padding: 12px 30px; border-radius: 6px; font-size: 16px; font-weight: 700; cursor: pointer; margin-top: 10px; }
+    button:hover { background: #0D5A70; }
+    .log { background: #f0f0f0; padding: 10px; border-radius: 6px; font-family: 'Courier New', monospace; font-size: 12px; max-height: 300px; overflow-y: auto; white-space: pre-wrap; margin-top: 10px; }
+    .success { color: #1E7B34; }
+    .error { color: #CC0000; }
+    .info { color: #0B5394; }
+    .warning { color: #B45309; }
+    #fileInput { display: none; }
+    label { display: block; margin: 10px 0; font-weight: 600; color: #0B5394; cursor: pointer; }
+    label input[type="checkbox"] { width: 18px; height: 18px; margin-right: 8px; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📦 Bulk Product Import</h1>
+    <p>Upload your <strong>products.csv</strong> file (headers: productName, group, category, barcode, wac, sellingPrice, baselineDate, baselineQty, currentStock, bundleAvailable, bundleSize, bundlePrice).</p>
+
+    <div class="drop-zone" id="dropZone">
+      <p style="font-size: 18px; color: #0B5394;">📂 Drag & drop your CSV file here</p>
+      <p style="color: #999;">or click to select</p>
+    </div>
+    <input type="file" id="fileInput" accept=".csv">
+
+    <!-- NEW: Update checkbox -->
+    <label>
+      <input type="checkbox" id="updateCheckbox">
+      ✅ Update existing products (if unchecked, duplicates will be skipped)
+    </label>
+
+    <button id="importBtn" disabled>🚀 Import Products</button>
+    <div id="log" class="log">Ready to import...</div>
+  </div>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/12.15.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore-compat.js"></script>
+
+  <script>
+    // ─── Firebase Config ──────────────────────────────────────────
+    const firebaseConfig = {
+  apiKey: "AIzaSyA31nP6b9BuHvB4ffwQcKiHrs5vT7E0K4g",
+  authDomain: "biz-management-system-tz.firebaseapp.com",
+  projectId: "biz-management-system-tz",
+  storageBucket: "biz-management-system-tz.firebasestorage.app",
+  messagingSenderId: "246381480533",
+  appId: "1:246381480533:web:c6723c6277f61416e6e2dc"
+};
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    // ─── DOM ──────────────────────────────────────────────────────
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+    const importBtn = document.getElementById('importBtn');
+    const logEl = document.getElementById('log');
+    const updateCheckbox = document.getElementById('updateCheckbox');
+
+    let selectedFile = null;
+
+    function log(msg, type) {
+      const colors = { success: '#1E7B34', error: '#CC0000', info: '#0B5394', warning: '#B45309' };
+      const color = colors[type] || '#333';
+      logEl.innerHTML += `<span style="color:${color}">${msg}</span>\n`;
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    // ─── Drag & Drop ──────────────────────────────────────────────
+    dropZone.addEventListener('click', () => fileInput.click());
+    dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropZone.classList.remove('dragover');
+      if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files.length) handleFile(e.target.files[0]);
+    });
+
+    function handleFile(file) {
+      if (!file.name.endsWith('.csv')) {
+        log('❌ Please select a CSV file.', 'error');
+        return;
+      }
+      selectedFile = file;
+      importBtn.disabled = false;
+      log(`✅ Selected: ${file.name} (${(file.size/1024).toFixed(1)} KB)`, 'success');
+    }
+
+    // ─── Parse CSV (handles quoted fields) ──────────────────────
+    function parseCSV(text) {
+      const lines = text.trim().split('\n');
+      const headers = lines[0].split(',').map(h => h.trim());
+      return lines.slice(1).map(line => {
+        const values = [];
+        let current = '';
+        let inQuotes = false;
+        for (const char of line) {
+          if (char === '"') { inQuotes = !inQuotes; continue; }
+          if (char === ',' && !inQuotes) {
+            values.push(current.trim());
+            current = '';
+            continue;
+          }
+          current += char;
+        }
+        values.push(current.trim());
+
+        const obj = {};
+        headers.forEach((h, i) => {
+          let val = values[i] || '';
+          if (['wac', 'sellingPrice', 'bundlePrice', 'bundleSize'].includes(h)) {
+            val = val.replace(/,/g, '').trim();
+            obj[h] = val === '' ? 0 : parseFloat(val) || 0;
+          } else if (h === 'bundleAvailable') {
+            obj[h] = val.toUpperCase() === 'YES';
+          } else if (h === 'currentStock' || h === 'baselineQty') {
+            obj[h] = val === '' ? 0 : parseFloat(val) || 0;
+          } else if (h === 'barcode') {
+            if (val.includes('E+') || val.includes('e+')) {
+              obj[h] = parseFloat(val).toString();
+            } else {
+              obj[h] = val;
+            }
+          } else {
+            obj[h] = val;
+          }
+        });
+        return obj;
+      });
+    }
+
+// ─── Get next sequential product ID ──────────────────────────
+async function getNextProductId() {
+  const counterRef = db.collection('counters').doc('productCounter');
+  const counterDoc = await counterRef.get();
+  let count = 1;
+  if (counterDoc.exists) {
+    count = (counterDoc.data().count || 0) + 1;
+    await counterRef.update({ count: count });
+  } else {
+    await counterRef.set({ count: count });
+  }
+  return 'PRD-' + String(count).padStart(4, '0');
+}
+
+    // ─── Import ──────────────────────────────────────────────────
+    importBtn.addEventListener('click', async function() {
+      if (!selectedFile) return;
+      this.disabled = true;
+      this.textContent = '⏳ Importing...';
+
+      try {
+        const text = await selectedFile.text();
+        log('📄 Parsing CSV...', 'info');
+
+        const products = parseCSV(text);
+        log(`📦 ${products.length} products parsed.`, 'info');
+
+        const updateMode = updateCheckbox.checked;
+
+        let added = 0;
+        let updated = 0;
+        let skipped = 0;
+
+        // We'll process in batches of 400
+        const BATCH_SIZE = 400;
+        for (let i = 0; i < products.length; i += BATCH_SIZE) {
+          const batch = db.batch();
+          const chunk = products.slice(i, i + BATCH_SIZE);
+
+          for (const p of chunk) {
+            // ── Check if product exists ──
+            let existingProductRef = null;
+            let existingDoc = null;
+
+            // Try by productName first
+            const nameQuery = await db.collection('products').where('productName', '==', p.productName).limit(1).get();
+            if (!nameQuery.empty) {
+              existingDoc = nameQuery.docs[0];
+              existingProductRef = existingDoc.ref;
+            } else if (p.barcode) {
+              // Try by barcode
+              const barcodeQuery = await db.collection('products').where('barcode', '==', p.barcode).limit(1).get();
+              if (!barcodeQuery.empty) {
+                existingDoc = barcodeQuery.docs[0];
+                existingProductRef = existingDoc.ref;
+              }
+            }
+
+            if (existingProductRef && !updateMode) {
+              // Skip (update mode off)
+              skipped++;
+              continue;
+            }
+
+            if (existingProductRef && updateMode) {
+              // ── UPDATE existing product ──
+              batch.update(existingProductRef, {
+                productName: p.productName,
+                group: p.group || '',
+                category: p.category || 'General',
+                barcode: p.barcode || '',
+                wac: p.wac || 0,
+                sellingPrice: p.sellingPrice || 0,
+                baselineDate: p.baselineDate || null,
+                baselineQty: p.baselineQty || 0,
+                bundleAvailable: p.bundleAvailable || false,
+                bundleSize: p.bundleSize || 0,
+                bundlePrice: p.bundlePrice || 0,
+                updatedAt: new Date().toISOString()
+              });
+
+              // Update inventory (inventorySummary is linked by productId)
+              const invQuery = await db.collection('inventorySummary').where('productId', '==', existingProductRef.id).limit(1).get();
+              if (!invQuery.empty) {
+                batch.update(invQuery.docs[0].ref, {
+                  quantity: p.currentStock || 0,
+                  wac: p.wac || 0,
+                  updatedAt: new Date().toISOString()
+                });
+              } else {
+                // If inventory doesn't exist, create it
+                const newInvRef = db.collection('inventorySummary').doc(existingProductRef.id);
+                batch.set(newInvRef, {
+                  productId: existingProductRef.id,
+                  quantity: p.currentStock || 0,
+                  wac: p.wac || 0,
+                  updatedAt: new Date().toISOString()
+                });
+              }
+              updated++;
+
+                
+
+            } else {
+  // ── ADD new product with sequential ID ──
+const newId = await getNextProductId();
+const productRef = db.collection('products').doc(newId);
+batch.set(productRef, {
+  productId: newId,
+  productName: p.productName,
+  group: p.group || '',
+  category: p.category || 'General',
+  barcode: p.barcode || '',
+  wac: p.wac || 0,
+  sellingPrice: p.sellingPrice || 0,
+  baselineDate: p.baselineDate || null,
+  baselineQty: p.baselineQty || 0,
+  bundleAvailable: p.bundleAvailable || false,
+  bundleSize: p.bundleSize || 0,
+  bundlePrice: p.bundlePrice || 0,
+  createdAt: new Date().toISOString()
+});
+
+// Use product ID as summary doc ID
+const invRef = db.collection('inventorySummary').doc(newId);
+batch.set(invRef, {
+  productId: newId,
+  quantity: p.currentStock || 0,
+  wac: p.wac || 0,
+  updatedAt: new Date().toISOString()
+});
+  added++;
+} 
+          }
+
+          // Commit the batch
+          await batch.commit();
+          const totalProcessed = Math.min(i + BATCH_SIZE, products.length);
+          log(`✅ Batch ${Math.floor(i/BATCH_SIZE)+1} committed (${totalProcessed}/${products.length})`, 'success');
+        }
+
+        log(`\n📊 Summary:`, 'info');
+        log(`   ➕ Added: ${added}`, 'success');
+        log(`   🔄 Updated: ${updated}`, 'info');
+        log(`   ⏭️ Skipped: ${skipped}`, 'warning');
+        log(`🎉 Import complete!`, 'success');
+        log('🔄 Refresh your POS page to see the changes.', 'info');
+
+      } catch (err) {
+        log(`❌ Import error: ${err.message}`, 'error');
+        console.error(err);
+      } finally {
+        this.disabled = false;
+        this.textContent = '🚀 Import Products';
+      }
+    });
+
+    log('📁 Drop your CSV file or click to select.', 'info');
+    log('ℹ️ If "Update existing products" is checked, existing products will be updated.', 'info');
+  </script>
+</body>
+</html>
