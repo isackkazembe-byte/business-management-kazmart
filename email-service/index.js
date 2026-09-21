@@ -154,7 +154,7 @@ app.post('/ai-chat', async (req, res) => {
       : 'No context provided.';
 
     const model = geminiClient.getGenerativeModel({
-      model: 'gemini-1.5-flash',
+      model: 'gemini-2.5-flash',
       systemInstruction: AI_SYSTEM_PROMPT,
     });
 
