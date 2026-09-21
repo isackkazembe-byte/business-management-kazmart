@@ -1,6 +1,7 @@
 const express = require('express');
 const sgMail = require('@sendgrid/mail');
 const cors = require('cors');
+const { GoogleGenerativeAI } = require('@google/generative-ai');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -114,6 +115,62 @@ app.post('/send-whatsapp', async (req, res) => {
   } catch (error) {
     console.error('WhatsApp error:', error.message);
     res.status(500).json({ error: error.message });
+  }
+});
+
+
+// ─── AI Chat Assistant ──────────────────────────────────────
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+let geminiClient = null;
+if (GEMINI_API_KEY) {
+  geminiClient = new GoogleGenerativeAI(GEMINI_API_KEY);
+} else {
+  console.warn('⚠️ GEMINI_API_KEY not set — /ai-chat will be disabled.');
+}
+
+const AI_SYSTEM_PROMPT = `You are the KazMart Business Assistant — an AI that helps shop owners understand their business.
+
+Your rules:
+- Answer using ONLY the context data provided below. Never invent numbers.
+- Keep replies short and direct (2-4 sentences max). Shop owners are busy.
+- Currency is TZS. Format numbers with commas.
+- If the context doesn't contain the answer, say "I don't have that information right now. Try asking about today's sales, stock, debts, or approvals."
+- Be helpful, friendly, and professional. No emojis.
+- Never discuss anything outside of running a retail/wholesale shop.`;
+
+app.post('/ai-chat', async (req, res) => {
+  try {
+    if (!geminiClient) {
+      return res.status(500).json({ error: 'AI not configured. Set GEMINI_API_KEY on Render.' });
+    }
+
+    const { question, context } = req.body;
+    if (!question || typeof question !== 'string') {
+      return res.status(400).json({ error: 'Missing required field: question' });
+    }
+
+    const contextStr = context
+      ? JSON.stringify(context, null, 2).substring(0, 4000)
+      : 'No context provided.';
+
+    const model = geminiClient.getGenerativeModel({
+      model: 'gemini-1.5-flash',
+      systemInstruction: AI_SYSTEM_PROMPT,
+    });
+
+    const prompt = `Here is the current business context:\n\n${contextStr}\n\n---\n\nQuestion from the shop owner: ${question}`;
+
+    const result = await model.generateContent(prompt);
+    const reply = result.response.text();
+
+    console.log(`🤖 AI replied (${reply.length} chars) to: "${question.substring(0, 60)}"`);
+    res.json({ success: true, reply });
+  } catch (error) {
+    console.error('AI chat error:', error.message);
+    res.status(500).json({
+      error: 'AI request failed',
+      detail: error.message
+    });
   }
 });
 
