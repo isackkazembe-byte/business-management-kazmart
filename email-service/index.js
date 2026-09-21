@@ -80,6 +80,44 @@ app.post('/send-bulk', async (req, res) => {
   }
 });
 
+
+// ─── Send WhatsApp via CallMeBot ────────────────────────────
+app.post('/send-whatsapp', async (req, res) => {
+  try {
+    const { message, phone } = req.body;
+    if (!message) {
+      return res.status(400).json({ error: 'Missing required field: message' });
+    }
+
+    const apiKey = process.env.CALLMEBOT_KEY;
+    if (!apiKey) {
+      console.error('❌ CALLMEBOT_KEY is not set.');
+      return res.status(500).json({ error: 'WhatsApp service not configured' });
+    }
+
+    // Default phone if not provided by the caller
+    const targetPhone = (phone || '255747123133').replace(/[^0-9]/g, '');
+
+    const url = `https://api.callmebot.com/whatsapp.php?phone=${targetPhone}&text=${encodeURIComponent(message)}&apikey=${apiKey}`;
+
+    const response = await fetch(url);
+    const body = await response.text();
+
+    // CallMeBot returns plain text on success, HTML error page on failure
+    if (!response.ok || body.includes('ERROR')) {
+      console.error('CallMeBot error:', body.substring(0, 200));
+      return res.status(500).json({ error: 'WhatsApp send failed', detail: body.substring(0, 200) });
+    }
+
+    console.log(`✅ WhatsApp sent to ${targetPhone}`);
+    res.json({ success: true, message: 'WhatsApp sent successfully' });
+  } catch (error) {
+    console.error('WhatsApp error:', error.message);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+
 // ─── Start Server ────────────────────────────────────────────
 app.listen(PORT, () => {
   console.log(`Email service running on port ${PORT}`);
